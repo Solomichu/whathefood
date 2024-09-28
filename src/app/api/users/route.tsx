@@ -131,10 +131,16 @@ export async function PUT(request: Request) {
         const role = formData.get('role') as 'ADMIN' | 'USER';
         const imageFile = formData.get('image');
 
-        const updateData: any = { 
+        const updateData: Partial<{
+            username: string;
+            email: string;
+            password: string;
+            role: 'ADMIN' | 'USER';
+            image: string;
+        }> = { 
             username, 
             email, 
-            role: role as 'ADMIN' | 'USER'  // Asegúrate de que role sea tratado como un enum
+            role: role as 'ADMIN' | 'USER'
         };
 
         if (password) {

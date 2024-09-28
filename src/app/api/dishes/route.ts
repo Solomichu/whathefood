@@ -1,10 +1,11 @@
 // @typescript-eslint/no-explicit-any
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Status } from '@prisma/client';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import { unlink } from 'fs/promises';
+import { Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
     } else {
         // GET todos los platos con filtros opcionales
         try {
-            const whereClause: any = {};
+            const whereClause: Prisma.DishWhereInput = {};
 
             if (search) {
                 whereClause.name = { contains: search, mode: 'insensitive' };
@@ -166,16 +167,16 @@ export async function PUT(request: Request) {
         const name = formData.get('name') as string;
         const instructions = formData.get('instructions') as string;
         const prepTime = formData.get('prepTime') as string;
-        const status = formData.get('status') as string;
+        const status = formData.get('status') as Status;
         const imageFile = formData.get('image') as File | null;
         const createdById = formData.get('createdById') as string;
 
-        const updateData: any = {
+        const updateData: Prisma.DishUpdateInput = {
             name,
             instructions,
             prepTime,
             status,
-            createdById  // Añadimos createdById al objeto de actualización
+            createdBy: { connect: { id: createdById } }
         };
 
         if (imageFile) {

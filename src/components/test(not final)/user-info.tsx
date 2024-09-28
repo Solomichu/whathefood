@@ -8,7 +8,7 @@ export default function UserInfo() {
   if (session?.user) {
     return (
       <h1>
-        Bienvenido '<strong>{session.user.name}</strong>' con rol '<strong>{session.user.role}</strong>'
+        Bienvenido &apos;<strong>{session.user.name}</strong>&apos; con rol &apos;<strong>{session.user.role}</strong>&apos;
         <br />
         Email: {session.user.email}
         <br />
