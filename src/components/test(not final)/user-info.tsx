@@ -1,6 +1,6 @@
 'use client'
 import { useSession } from 'next-auth/react'
-import { Session } from 'next-auth'
+import Image from 'next/image';
 
 export default function UserInfo() {
   const { data: session } = useSession();
@@ -8,7 +8,7 @@ export default function UserInfo() {
   if (session?.user) {
     return (
       <h1>
-        Bienvenido "<strong>{session.user.name}</strong>" con rol "<strong>{session.user.role}</strong>"
+        Bienvenido '<strong>{session.user.name}</strong>' con rol '<strong>{session.user.role}</strong>'
         <br />
         Email: {session.user.email}
         <br />
@@ -16,8 +16,13 @@ export default function UserInfo() {
         <br />
         Role: {session.user.role}
         <br />        
-        <img src={imgroute ?? 'none'} alt="Imagen de perfil" className="w-20 h-20 rounded-full" />
-
+        <Image 
+          src={imgroute ?? '/ruta/a/imagen/por/defecto.jpg'} 
+          alt="Imagen de perfil" 
+          width={80} 
+          height={80} 
+          className="rounded-full"
+        />
         
       </h1>
     )

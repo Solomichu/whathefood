@@ -1,3 +1,5 @@
+// @typescript-eslint/no-explicit-any
+
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { writeFile } from 'fs/promises';
@@ -56,7 +58,7 @@ export async function GET(request: Request) {
     } else {
         // GET todos los platos con filtros opcionales
         try {
-            let whereClause: any = {};
+            const whereClause: any = {};
 
             if (search) {
                 whereClause.name = { contains: search, mode: 'insensitive' };

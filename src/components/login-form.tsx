@@ -2,7 +2,6 @@
 import React, { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Session } from 'next-auth'
 
 export default function LoginForm() {
     const [email, setEmail] = useState('')
@@ -39,6 +38,7 @@ export default function LoginForm() {
             }
         } catch (error) {
             setError('Ocurrió un error al iniciar sesión')
+            console.log(error)
         }
     }
 

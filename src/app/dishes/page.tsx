@@ -34,11 +34,7 @@ export default function DishList_Page() {
   const [usersWithDishes, setUsersWithDishes] = useState<UserWithDishCount[]>([]);
   const [selectedUser, setSelectedUser] = useState('');
 
-  useEffect(() => {
-    fetchDishes();
-  }, [search, selectedStatus, selectedUser]);
-
-  async function fetchDishes() {
+  const fetchDishes = React.useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
@@ -57,7 +53,11 @@ export default function DishList_Page() {
     } catch (error) {
       console.error('Error:', error);
     }
-  }
+  }, [search, selectedStatus, selectedUser]);
+
+  useEffect(() => {
+    fetchDishes();
+  }, [search, selectedStatus, selectedUser, fetchDishes]);
 
   return (
     <div className="container mx-auto p-4">

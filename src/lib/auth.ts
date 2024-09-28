@@ -1,4 +1,4 @@
-import { NextAuthOptions, User } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import prisma from './prisma';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
             }
             return token;
         },
-        async session({ session, token ,user}) {
+        async session({ session, token}) {
             if (session.user) {
                 session.user.id = token.sub;
                 session.user.role = token.role as string;

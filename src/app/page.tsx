@@ -1,5 +1,4 @@
 import UserInfo from "@/components/test(not final)/user-info";
-import { authOptions } from "@/lib/auth";
 import Image from "next/image";
 
 export default async function Home() {
