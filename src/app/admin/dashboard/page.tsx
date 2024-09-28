@@ -1,15 +1,13 @@
-// @ts-nocheck
-
 "use client"
 import AdminNavbar from '@/components/admin-navbar'
-import React, { ReactElement, ReactNode, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 
 // Importa los componentes de las páginas que crearás en el futuro
 import FuturePage1 from './usertable'
 import FuturePage2 from './foodtable'
-import { PageProps } from '../../../../.next/types/app/layout'
 // ... importa más páginas según sea necesario
 
+// @ts-ignore
 export default function Page({ children }: ReactNode) {
   const [currentPage, setCurrentPage] = useState<ReactNode>(<FuturePage1 />)
 
