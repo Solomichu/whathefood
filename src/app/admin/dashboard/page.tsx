@@ -1,4 +1,5 @@
 "use client"
+
 import AdminNavbar from '@/components/admin-navbar'
 import React, { ReactNode, useState } from 'react'
 
