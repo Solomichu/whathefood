@@ -171,7 +171,7 @@ export default function UserTable() {
         form.append('email', formData.email);
         form.append('password', formData.password);
         form.append('role', formData.role); // Asegúrate de incluir el rol
-        if (formData.image) {
+        if (formData.image instanceof File) {
             form.append('image', formData.image);
         }
 

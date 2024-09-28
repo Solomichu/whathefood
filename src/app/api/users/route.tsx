@@ -187,9 +187,9 @@ export async function DELETE(request: Request) {
             await deleteUserImage(user.image);
         }
 
-        const deletedUser = await prisma.user.delete({
+        /*const deletedUser = await prisma.user.delete({
             where: { id },
-        });
+        });*/
 
         return NextResponse.json({ message: 'Usuario eliminado exitosamente' }, { status: 200 });
     } catch (error) {
@@ -199,7 +199,7 @@ export async function DELETE(request: Request) {
 }
 
 // Función auxiliar para guardar imágenes de usuario
-async function saveUserImage(imageFile: any, userId: string): Promise<string> {
+async function saveUserImage(imageFile: File, userId: string): Promise<string> {
     const bytes = await imageFile.arrayBuffer();
     const buffer = Buffer.from(bytes);
 

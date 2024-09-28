@@ -51,12 +51,14 @@ export default function EditUser_Page() {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (e.target.name === 'image' && e.target instanceof HTMLInputElement) {
-      setFormData({ ...formData, image: e.target.files ? e.target.files[0] : null });
+    const { name, value, type } = e.target;
+    if (type === 'file' && e.target instanceof HTMLInputElement) {
+        const file = e.target.files ? e.target.files[0] : null;
+        setFormData(prev => ({ ...prev, [name]: file }));
     } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFormData(prev => ({ ...prev, [name]: value }));
     }
-  };
+};
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
