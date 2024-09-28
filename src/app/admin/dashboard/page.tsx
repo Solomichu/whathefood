@@ -7,8 +7,8 @@ import FuturePage1 from './usertable'
 import FuturePage2 from './foodtable'
 // ... importa más páginas según sea necesario
 
-export default function AdminDashboardPage({ children }: { children: ReactNode }) {
-  const [currentPage, setCurrentPage] = useState<ReactNode>(children)
+export default function AdminDashboardPage() {
+  const [currentPage, setCurrentPage] = useState<ReactNode>(<FuturePage1 />)
 
   const handleNavClick = (page: string) => {
     switch(page) {
@@ -19,8 +19,6 @@ export default function AdminDashboardPage({ children }: { children: ReactNode }
         setCurrentPage(<FuturePage2 />)
         break
       // ... agrega más casos según sea necesario
-      default:
-        setCurrentPage(children)
     }
   }
 
