@@ -8,7 +8,7 @@ import FuturePage1 from './usertable'
 import FuturePage2 from './foodtable'
 // ... importa más páginas según sea necesario
 
-// @ts-ignore
+// @ts-expect-error
 export default function Page({ children }: ReactNode) {
   const [currentPage, setCurrentPage] = useState<ReactNode>(<FuturePage1 />)
 
