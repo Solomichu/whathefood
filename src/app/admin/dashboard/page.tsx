@@ -7,11 +7,7 @@ import FuturePage1 from './usertable'
 import FuturePage2 from './foodtable'
 // ... importa más páginas según sea necesario
 
-interface AdminDashboardPageProps {
-  // Añade aquí las props que necesites, si las hay
-}
-
-const AdminDashboardPage: React.FC<AdminDashboardPageProps> = () => {
+export default function Page() {
   const [currentPage, setCurrentPage] = useState<ReactNode>(<FuturePage1 />)
 
   const handleNavClick = (page: string) => {
@@ -35,6 +31,4 @@ const AdminDashboardPage: React.FC<AdminDashboardPageProps> = () => {
     </main>
   )
 }
-
-export default AdminDashboardPage
 
