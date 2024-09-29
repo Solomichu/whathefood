@@ -8,8 +8,9 @@ import FuturePage1 from './usertable'
 import FuturePage2 from './foodtable'
 // ... importa más páginas según sea necesario
 
-// @ts-expect-error
-export default function Page({ children }: ReactNode) {
+// @ts-expect-error: Ignorando error de tipo en la exportación de Page para Next.js App Router
+expectsString(123);
+export default function Page({ children }: { children: ReactNode }) {
   const [currentPage, setCurrentPage] = useState<ReactNode>(<FuturePage1 />)
 
   const handleNavClick = (page: string) => {
