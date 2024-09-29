@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from 'next/image'
 
 interface Dish {
@@ -14,24 +17,23 @@ interface Dish {
   prepTime: string | null;
   status: string;
   image: string | null;
-  createdById: string;
+  creatorUsername: string;
+  creatorImage: string;
 }
 
-interface EditDishDialogProps {
-  dish: Dish;
-  onDishUpdated: (updatedDish: Dish) => void;
+interface CreatDishModalProps {
+  onDishCreated: (newDish: Dish) => void;
 }
 
-export default function EditDishDialog({ dish, onDishUpdated }: EditDishDialogProps) {
+export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
   const [formData, setFormData] = useState({
-    name: dish.name,
-    instructions: dish.instructions || '',
-    prepTime: dish.prepTime || '',
-    status: dish.status,
+    name: '',
+    instructions: '',
+    prepTime: '',
+    status: 'PENDING',
     image: null as File | null,
-    createdById: dish.createdById,
   });
-  const [previewImage, setPreviewImage] = useState<string | null>(dish.image);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -68,35 +70,32 @@ export default function EditDishDialog({ dish, onDishUpdated }: EditDishDialogPr
       }
     });
 
-    if (dish.createdById) {
-      form.append('createdById', dish.createdById);
-    }
-
     try {
-      const response = await fetch(`/api/dishes?id=${dish.id}`, {
-        method: 'PUT',
+      const response = await fetch('/api/dishes', {
+        method: 'POST',
         body: form,
       });
       if (response.ok) {
-        const updatedDish = await response.json();
-        onDishUpdated(updatedDish);
+        const newDish = await response.json();
+        onDishCreated(newDish);
+        alert('Plato creado exitosamente');
       } else {
         const errorData = await response.json();
-        alert(`Error al actualizar el plato: ${errorData.error}`);
+        alert(`Error al crear el plato: ${errorData.error}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al actualizar el plato');
+      alert('Error al crear el plato');
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <DialogHeader>
-        <DialogTitle>Editar Plato</DialogTitle>
+        <DialogTitle>Crear Nuevo Plato</DialogTitle>
       </DialogHeader>
       <div className="flex gap-4 py-4">
-        <div className="w-1/2 just m-auto">
+        <div className="w-1/2">
           <div className="grid gap-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="name" className="text-right">
@@ -131,33 +130,61 @@ export default function EditDishDialog({ dish, onDishUpdated }: EditDishDialogPr
                 </SelectContent>
               </Select>
             </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="image" className="text-right">
-              Nueva imagen
-            </label>
-            <Input id="image" name="image" type="file" onChange={handleImageChange} className="col-span-3" />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="image" className="text-right">
+                Imagen
+              </label>
+              <Input id="image" name="image" type="file" onChange={handleImageChange} className="col-span-3" />
+            </div>
           </div>
         </div>
-        <div className="w-1/2 m-auto ">
-          <div className="relative h-64 bg-green-600 mb-4">
-            {previewImage ? (
-              <Image
-                src={previewImage}
-                alt={formData.name}
-                layout="fill"
-                objectFit="cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-white">
-                Sin imagen
+        <div className="w-1/2">
+          <Card className="overflow-hidden">
+            <CardHeader className="p-0">
+              <div className="relative h-40 bg-green-600">
+                {previewImage ? (
+                  <Image
+                    src={previewImage}
+                    alt={formData.name}
+                    layout="fill"
+                    objectFit="cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-white">
+                    Sin imagen
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="text-lg font-semibold">{formData.name || 'Nombre del plato'}</h3>
+                  <p className="text-sm text-gray-500 truncate">{formData.instructions || 'Instrucciones del plato'}</p>
+                </div>
+                <Badge variant="secondary">{formData.prepTime || '0'}'</Badge>
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Badge variant="outline" className={
+                  formData.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                  formData.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }>
+                  {formData.status}
+                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Avatar>
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm">Usuario actual</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
       <div className="flex justify-center mt-4">
-        <Button type="submit">Guardar cambios</Button>
+        <Button type="submit">Crear plato</Button>
       </div>
     </form>
   )

@@ -1,82 +1,145 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+interface Dish {
+	id: string;
+	image: string | null;
+	name: string;
+	instructions: string | null;
+	prepTime: string | null;
+	status: string;
+	creatorUsername: string;
+	creatorImage: string;
+}
 
 export default function LoginForm() {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const router = useRouter()
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [error, setError] = useState('')
+	const [dishes, setDishes] = useState<Dish[]>([])
+	const [currentDish, setCurrentDish] = useState(0)
+	const router = useRouter()
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError('')
+	useEffect(() => {
+		const fetchDishes = async () => {
+			try {
+				const response = await fetch('/api/dishes');
+				if (!response.ok) {
+					throw new Error('Error al obtener los platos');
+				}
+				const data = await response.json();
+				setDishes(data.dishes);
+			} catch (error) {
+				console.error('Error:', error);
+			}
+		};
 
-        try {
-            const result = await signIn('credentials', {
-                email,
-                password,
-                redirect: false,
-            })
-            console.log(`Components/login-form.tsx:29 user role: 23`)
+		fetchDishes();
+	}, []);
 
-            if (result?.error) {
-                console.log(`Components/login-form.tsx:29 user role: 26`)
-                setError('Credenciales inválidas')
-            } else {
-                // Obtener la sesión actual
-                const session = await getSession()
-                console.log(`Components/login-form.tsx:31 user role: ${session?.user?.role}`)
-                if (session?.user?.role === 'ADMIN') {
-                    console.log(` if Components/login-form.tsx:33 user role: ${session?.user?.role}`)
-                    router.push('/admin/dashboard')
-                } else {
-                    console.log(` else Components/login-form.tsx:38 user role: ${session?.user?.role}`)
-                    router.push('/')
-                }
-            }
-        } catch (error) {
-            setError('Ocurrió un error al iniciar sesión')
-            console.log(error)
-        }
-    }
+	useEffect(() => {
+		if (dishes.length > 0) {
+			const interval = setInterval(() => {
+				setCurrentDish((prev) => (prev + 1) % dishes.length)
+			}, 5000) // Cambia el plato cada 5 segundos
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">
-                    Correo electrónico
-                </label>
-                <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    required
-                />
-            </div>
-            <div>
-                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">
-                    Contraseña
-                </label>
-                <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    required
-                />
-            </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            <button
-                type="submit"
-                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            >
-                Iniciar sesión
-            </button>
-        </form>
-    )
+			return () => clearInterval(interval)
+		}
+	}, [dishes])
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setError('')
+
+		try {
+			const result = await signIn('credentials', {
+				email,
+				password,
+				redirect: false,
+			})
+
+			if (result?.error) {
+				setError('Credenciales inválidas')
+			} else {
+				const session = await getSession()
+				if (session?.user?.role === 'ADMIN') {
+					router.push('/admin/dashboard')
+				} else {
+					router.push('/')
+				}
+			}
+		} catch (error) {
+			setError('Ocurrió un error al iniciar sesión')
+			console.log(error)
+		}
+	}
+
+	return (
+		<div className="flex h-screen">
+			<div className="w-1/2 relative">
+				{dishes.length > 0 && (
+					<div 
+						className="w-full h-full bg-cover bg-center transition-all duration-500 ease-in-out"
+						style={{ backgroundImage: `url(${dishes[currentDish].image || '/placeholder.jpg'})` }}
+					>
+						<div className="absolute bottom-4 left-4 bg-white bg-opacity-80 rounded-lg p-2 flex items-center space-x-2">
+							<Avatar className="h-8 w-8">
+								<AvatarImage src={dishes[currentDish].creatorImage} alt={dishes[currentDish].creatorUsername} />
+								<AvatarFallback>{dishes[currentDish].creatorUsername[0]}</AvatarFallback>
+							</Avatar>
+							<div>
+								<p className="text-sm font-semibold">{dishes[currentDish].name}</p>
+								<p className="text-xs">{dishes[currentDish].creatorUsername}</p>
+							</div>
+						</div>
+					</div>
+				)}
+			</div>
+			<div className="w-1/2 flex items-center justify-center bg-gray-100">
+				<Card className="w-[350px]">
+					<CardHeader>
+						<CardTitle className="text-2xl font-bold">WHATHEFOOD.</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<form onSubmit={handleSubmit} className="space-y-4">
+							<div className="space-y-2">
+								<label htmlFor="email" className="text-sm font-medium">
+									Email
+								</label>
+								<Input
+									type="email"
+									id="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									required
+								/>
+							</div>
+							<div className="space-y-2">
+								<label htmlFor="password" className="text-sm font-medium">
+									Contraseña
+								</label>
+								<Input
+									type="password"
+									id="password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									required
+								/>
+							</div>
+							{error && <p className="text-red-500 text-sm">{error}</p>}
+							<Button type="submit" className="w-full">
+								Iniciar sesión
+							</Button>
+						</form>
+					</CardContent>
+				</Card>
+			</div>
+		</div>
+	)
 }

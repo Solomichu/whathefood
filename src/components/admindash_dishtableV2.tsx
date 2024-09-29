@@ -16,6 +16,9 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import EditDishDialog from './editdish_dialog'
 import DeleteDishDialog from './deletedish_dialog'
 import { useRouter } from 'next/navigation'
+import CreatDishModal from './createdish_modal'
+import { Separator } from './ui/separator'
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 
 interface Dish {
   id: string;
@@ -34,6 +37,9 @@ export default function AdmindashDishtableV2() {
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingDish, setDeletingDish] = useState<Dish | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [updatedDishName, setUpdatedDishName] = useState('');
 
   useEffect(() => {
     const fetchDishes = async () => {
@@ -85,12 +91,27 @@ export default function AdmindashDishtableV2() {
     setDeletingDish(null);
   };
 
+  const handleDishUpdated = (updatedDish: Dish) => {
+    setDishes(prevDishes => prevDishes.map(d => 
+      d.id === updatedDish.id ? {
+        ...updatedDish,
+        creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
+        creatorImage: updatedDish.creatorImage || '/ruta/a/imagen/por/defecto.jpg',
+      } : d
+    ));
+    setUpdatedDishName(updatedDish.name);
+    setIsDrawerOpen(true);
+    setTimeout(() => setIsDrawerOpen(false), 2000);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Recetas</h1>
         <Button>Crear</Button>
       </div>
+      <Separator className='mb-10'/>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {dishes.map((dish) => (
           <Card key={dish.id} className="overflow-hidden">
@@ -153,15 +174,7 @@ export default function AdmindashDishtableV2() {
                         <DialogContent className="sm:max-w-[700px] !h-[50vh]">
                           <EditDishDialog 
                             dish={dish} 
-                            onDishUpdated={(updatedDish) => {
-                              setDishes(prevDishes => prevDishes.map(d => 
-                                d.id === updatedDish.id ? {
-                                  ...updatedDish,
-                                  creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
-                                  creatorImage: updatedDish.creatorImage || '/ruta/a/imagen/por/defecto.jpg',
-                                } : d
-                              ));
-                            }} 
+                            onDishUpdated={handleDishUpdated}
                           />
                         </DialogContent>
                       </Dialog>
@@ -205,6 +218,16 @@ export default function AdmindashDishtableV2() {
           />
         )}
       </Dialog>
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} >
+        <DrawerContent className='flex w-fit m-auto px-10'>
+          <DrawerHeader>
+            <DrawerTitle className='bg-primary text-secondary px-2 py-3 rounded-lg text-center'>Plato Actualizado</DrawerTitle>
+            <DrawerDescription>
+              Se ha actualizado el plato: {updatedDishName}
+            </DrawerDescription>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

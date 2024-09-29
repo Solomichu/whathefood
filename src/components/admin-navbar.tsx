@@ -13,14 +13,14 @@ export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
 
   return (
     <aside 
-      className={`inset-y-0 left-0 z-10 flex-col border-r border-primary hidden sm:flex justify-between h-[100vh] bg-primary transition-all duration-300 ${isExpanded ? 'w-48' : 'w-14'}`}
-      onMouseEnter={() => setIsExpanded(true)}
+    className={`inset-y-0 left-0 z-10 flex-col border-r border-primary hidden sm:flex justify-between h-[100vh] bg-primary transition-all duration-300 ${isExpanded ? 'w-48' : 'w-14'}`}
+    onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      <Link href="/" className="flex w-full justify-center mt-5 py-5">          
+      <Link href="/" className={`flex w-full justify-center mt-5 py-5 transition-transform duration-300 ${isExpanded ? '-rotate-90' : ''}`}>          
           <h1 className="[writing-mode:vertical-lr] text-secondary text-xl font-bold">WHATHEFOOD.</h1>
-        </Link>
-      <nav className="flex flex-col justify-center items-center gap-8 py-5">
+      </Link>
+      <nav className="flex flex-col justify-center items-center gap-8 py-5 px-2">
         
         <NavButton onClick={() => onNavClick('dashboard')} icon={<HomeIcon />} label="Dashboard" expanded={isExpanded} />
         <NavButton onClick={() => onNavClick('users')} icon={<UsersIcon />} label="Usuarios" expanded={isExpanded} />
@@ -58,11 +58,21 @@ function NavButton({ onClick, icon, label, expanded }: NavButtonProps) {
   return (
     <button 
       onClick={onClick} 
-      className={`flex transition duration-150 ease-in-out items-center justify-center rounded-lg text-secondary hover:justify-start text-secondary  w-full ${expanded ? 'px-3 py-2' : 'h-9 w-9 md:h-8 md:w-8'}`}
+      className={`flex transition-all duration-150 ease-in-out items-center justify-center rounded-lg text-secondary hover:bg-secondary hover:text-primary w-full ${expanded ? 'px-3 py-2' : 'h-9 w-9 md:h-8 md:w-8'}`}
     >
       {icon}
-      {expanded && <span className="ml-3 text-sm">{label}</span>}
-      {!expanded && <span className="sr-only">{label}</span>}
+      <span 
+        className={`
+          ml-3 text-m whitespace-nowrap
+          transition-all duration-75 ease-in-out
+          ${expanded 
+            ? 'opacity-100 translate-x-0' 
+            : 'opacity-0 -translate-x-4 absolute'
+          }
+        `}
+      >
+        {label}
+      </span>
     </button>
   )
 }
