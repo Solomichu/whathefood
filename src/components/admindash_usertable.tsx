@@ -88,7 +88,7 @@ export default function UserTable() {
     const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!selectedUser) return;
-
+    
         const form = new FormData();
         form.append('username', formData.username);
         form.append('email', formData.email);
@@ -99,20 +99,24 @@ export default function UserTable() {
         if (formData.image instanceof File) {
             form.append('image', formData.image);
         }
-
+    
         try {
             const response = await fetch(`/api/users?id=${selectedUser.id}`, {
                 method: 'PUT',
                 body: form,
             });
             if (response.ok) {
+                const data = await response.json();
+                alert(data.message);
                 fetchUsers();
                 setIsDialogOpen(false);
             } else {
-                console.error('Error al actualizar el usuario');
+                const errorData = await response.json();
+                alert(`Error al actualizar el usuario: ${errorData.error}`);
             }
         } catch (error) {
             console.error('Error:', error);
+            alert('Error al actualizar el usuario');
         }
     };
 
@@ -204,6 +208,12 @@ export default function UserTable() {
             image: null,
         });
         setIsDialogOpen(true);
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setFormData(prev => ({ ...prev, image: e.target.files![0] }));
+        }
     };
 
     return (
@@ -383,7 +393,7 @@ export default function UserTable() {
                                     type="file"
                                     id="image"
                                     name="image"
-                                    onChange={handleChange}
+                                    onChange={handleImageChange}
                                     accept="image/*"
                                 />
                             </div>

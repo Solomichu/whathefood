@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const search = searchParams.get('search');
-    const status = searchParams.get('status');
+    const status = searchParams.get('status') as Status | null;
     const userId = searchParams.get('userId');
 
     if (id) {
@@ -80,10 +80,20 @@ export async function GET(request: Request) {
                         select: {
                             id: true,
                             username: true,
+                            image: true,
                         },
                     },
                 },
             });
+
+            // Transformar los datos para incluir el username y la imagen del creador
+            const transformedDishes = dishes.map(dish => ({
+                ...dish,
+                creatorUsername: dish.createdBy?.username || 'Usuario desconocido',
+                creatorImage: dish.createdBy?.image || '/ruta/a/imagen/por/defecto.jpg',
+                createdBy: undefined, // Eliminar el objeto createdBy original
+                createdById: undefined, // Eliminar el createdById
+            }));
 
             const availableStatuses = await prisma.dish.groupBy({
                 by: ['status'],
@@ -109,7 +119,7 @@ export async function GET(request: Request) {
                 },
             });
 
-            return NextResponse.json({ dishes, availableStatuses, usersWithDishes });
+            return NextResponse.json({ dishes: transformedDishes, availableStatuses, usersWithDishes });
         } catch (error) {
             console.error('Error al obtener los platos:', error);
             return NextResponse.json({ error: 'Error al obtener los platos' }, { status: 500 });
@@ -167,31 +177,54 @@ export async function PUT(request: Request) {
         const name = formData.get('name') as string;
         const instructions = formData.get('instructions') as string;
         const prepTime = formData.get('prepTime') as string;
-        const status = formData.get('status') as Status;
-        const imageFile = formData.get('image') as File | null;
+        const status = formData.get('status') as string;
         const createdById = formData.get('createdById') as string;
+        const imageFile = formData.get('image') as File | null;
 
-        const updateData: Prisma.DishUpdateInput = {
+        const updateData: any = {
             name,
             instructions,
             prepTime,
             status,
-            createdBy: { connect: { id: createdById } }
         };
 
+        // Solo actualiza la relación con el usuario si se proporciona createdById
+        if (createdById) {
+            updateData.createdBy = { connect: { id: createdById } };
+        }
+
+        // Manejar la actualización de la imagen
         if (imageFile) {
-            updateData.image = await saveDishImage(imageFile, id);
+            const imagePath = await saveDishImage(imageFile, id);
+            updateData.image = imagePath;
         }
 
         const updatedDish = await prisma.dish.update({
             where: { id },
             data: updateData,
+            include: { 
+                createdBy: {
+                    select: {
+                        id: true,
+                        username: true,
+                        image: true,
+                    }
+                }
+            },
         });
 
-        return NextResponse.json({ message: 'Plato actualizado exitosamente', dish: updatedDish }, { status: 200 });
-    } catch (error) {
+        // Transforma los datos antes de enviarlos al cliente
+        const transformedDish = {
+            ...updatedDish,
+            creatorUsername: updatedDish.createdBy?.username || 'Usuario desconocido',
+            creatorImage: updatedDish.createdBy?.image || '/ruta/a/imagen/por/defecto.jpg',
+            createdBy: undefined, // Elimina el objeto createdBy original
+        };
+
+        return NextResponse.json(transformedDish);
+    } catch (error: any) {
         console.error('Error al actualizar el plato:', error);
-        return NextResponse.json({ error: 'Error al actualizar el plato' }, { status: 500 });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
@@ -253,19 +286,3 @@ async function deleteDishImage(imagePath: string): Promise<void> {
         console.error('Error al eliminar la imagen del plato:', error);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

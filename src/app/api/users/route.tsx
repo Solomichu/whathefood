@@ -125,6 +125,8 @@ export async function PUT(request: Request) {
 
     try {
         const formData = await request.formData();
+        console.log('FormData recibido:', Object.fromEntries(formData));
+
         const username = formData.get('username') as string;
         const email = formData.get('email') as string;
         const password = formData.get('password') as string | null;
@@ -148,14 +150,18 @@ export async function PUT(request: Request) {
         }
 
         if (imageFile && typeof imageFile !== 'string') {
+            console.log('Guardando nueva imagen...');
             const imagePath = await saveUserImage(imageFile, id);
             updateData.image = imagePath;
+            console.log('Nueva ruta de imagen:', imagePath);
         }
 
         const updatedUser = await prisma.user.update({
             where: { id },
             data: updateData,
         });
+
+        console.log('Usuario actualizado:', updatedUser);
 
         return NextResponse.json({ message: 'Usuario actualizado exitosamente', user: updatedUser }, { status: 200 });
     } catch (error) {
