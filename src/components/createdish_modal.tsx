@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
 
 interface Dish {
@@ -90,12 +91,14 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className='flex flex-col justify-around'>
       <DialogHeader>
-        <DialogTitle>Crear Nuevo Plato</DialogTitle>
+        <DialogTitle className='text-2xl ml-5'>Crear Nuevo Plato</DialogTitle>
       </DialogHeader>
-      <div className="flex gap-4 py-4">
-        <div className="w-1/2">
+      <Separator className='my-6'/>
+
+      <div className="flex gap-4">
+        <div className="w-3/5 p-2">
           <div className="grid gap-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="name" className="text-right">
@@ -138,7 +141,7 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
             </div>
           </div>
         </div>
-        <div className="w-1/2">
+        <div className="w-2/5">
           <Card className="overflow-hidden">
             <CardHeader className="p-0">
               <div className="relative h-40 bg-green-600">
@@ -184,7 +187,7 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
         </div>
       </div>
       <div className="flex justify-center mt-4">
-        <Button type="submit">Crear plato</Button>
+        <Button type="submit" className='p-6 text-lg'>Crear plato</Button>
       </div>
     </form>
   )

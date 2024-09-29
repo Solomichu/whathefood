@@ -104,11 +104,24 @@ export default function AdmindashDishtableV2() {
     setTimeout(() => setIsDrawerOpen(false), 2000);
   };
 
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  const handleDishCreated = (newDish: Dish) => {
+    setDishes(prevDishes => [...prevDishes, newDish]);
+    handleCloseCreateModal();
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Recetas</h1>
-        <Button>Crear</Button>
+        <Button onClick={handleOpenCreateModal}>Crear</Button>
       </div>
       <Separator className='mb-10'/>
 
@@ -228,6 +241,11 @@ export default function AdmindashDishtableV2() {
           </DrawerHeader>
         </DrawerContent>
       </Drawer>
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-[900px] !h-fit">
+          <CreatDishModal onDishCreated={handleDishCreated} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

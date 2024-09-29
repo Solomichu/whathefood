@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Image from 'next/image'
+import { Separator } from './ui/separator'
 
 interface Dish {
   id: string;
@@ -95,6 +96,7 @@ export default function EditDishDialog({ dish, onDishUpdated }: EditDishDialogPr
       <DialogHeader>
         <DialogTitle>Editar Plato</DialogTitle>
       </DialogHeader>
+      <Separator className='my-6'/>
       <div className="flex gap-4 py-4">
         <div className="w-1/2 just m-auto">
           <div className="grid gap-4">
