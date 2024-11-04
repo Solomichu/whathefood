@@ -79,6 +79,7 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
       if (response.ok) {
         const newDish = await response.json();
         onDishCreated(newDish);
+        
         alert('Plato creado exitosamente');
       } else {
         const errorData = await response.json();

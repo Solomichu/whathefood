@@ -247,5 +247,5 @@ export default function AdmindashDishtableV2() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  )  
 }
