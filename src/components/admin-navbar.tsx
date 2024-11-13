@@ -3,13 +3,29 @@ import React, { useState } from 'react'
 import { ModeToggle } from './theme-toggle-button'
 import { signOut } from "next-auth/react"
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation"
 
 interface AdminNavbarProps {
-  onNavClick: (page: string) => void
+  onNavClick: (page: string) => void;
+  activePage: string;
 }
 
-export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
+export default function AdminNavbar({ onNavClick, activePage }: AdminNavbarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const router = useRouter()
+
+  const handleNavClick = (page: string) => {
+    onNavClick(page);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({ redirect: false })
+      router.push('/') // Redirige a la página principal
+    } catch (error) {
+      console.error('Error durante el logout:', error)
+    }
+  }
 
   return (
     <aside 
@@ -18,15 +34,15 @@ export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
       onMouseLeave={() => setIsExpanded(false)}
     >
       <Link href="/" className={`flex w-full justify-center mt-5 py-5 transition-transform duration-300 ${isExpanded ? '-rotate-90' : ''}`}>          
-          <h1 className="[writing-mode:vertical-lr] text-secondary text-xl font-bold">WHATHEFOOD.</h1>
+          <h1 className="[writing-mode:vertical-lr] text-secondary text-xl font-bold">WHATHEFOOD+</h1>
       </Link>
       <nav className="flex flex-col justify-center items-center gap-8 py-5 px-2">
         
-        <NavButton onClick={() => onNavClick('dashboard')} icon={<HomeIcon />} label="Dashboard" expanded={isExpanded} />
-        <NavButton onClick={() => onNavClick('users')} icon={<UsersIcon />} label="Usuarios" expanded={isExpanded} />
-        <NavButton onClick={() => onNavClick('recipes')} icon={<RecipesIcon />} label="Recetas" expanded={isExpanded} />
-        <NavButton onClick={() => onNavClick('menus')} icon={<MenusIcon />} label="Menús" expanded={isExpanded} />
-        <NavButton onClick={() => onNavClick('tasks')} icon={<TasksIcon />} label="Tareas" expanded={isExpanded} />
+        <NavButton onClick={() => handleNavClick('dashboard')} icon={<HomeIcon />} label="Dashboard" expanded={isExpanded} active={activePage === 'dashboard'} />
+        <NavButton onClick={() => handleNavClick('users')} icon={<UsersIcon />} label="Usuarios" expanded={isExpanded} active={activePage === 'users'} />
+        <NavButton onClick={() => handleNavClick('recipes')} icon={<RecipesIcon />} label="Recetas" expanded={isExpanded} active={activePage === 'recipes'} />
+        <NavButton onClick={() => handleNavClick('menus')} icon={<MenusIcon />} label="Menús" expanded={isExpanded} active={activePage === 'menus'} />
+        <NavButton onClick={() => handleNavClick('tasks')} icon={<TasksIcon />} label="Tareas" expanded={isExpanded} active={activePage === 'tasks'} />
       </nav>
       <nav className="flex flex-col items-center gap-4 px-2 py-5 w-full">
         <div className="flex items-center gap-2">
@@ -35,7 +51,7 @@ export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
           </div>
           {isExpanded && (
             <Button
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className="bg-secondary text-primary rounded-lg p-1 hover:bg-red-700 hover:text-white transition-colors"
             >
               <LogoutIcon />
@@ -52,13 +68,24 @@ interface NavButtonProps {
   icon: React.ReactNode;
   label: string;
   expanded: boolean;
+  active: boolean;
 }
 
-function NavButton({ onClick, icon, label, expanded }: NavButtonProps) {
+function NavButton({ onClick, icon, label, expanded, active }: NavButtonProps) {
   return (
     <button 
       onClick={onClick} 
-      className={`flex transition-all duration-150 ease-in-out items-center justify-center rounded-lg text-secondary hover:bg-secondary hover:text-primary w-full ${expanded ? 'px-3 py-2' : 'h-9 w-9 md:h-8 md:w-8'}`}
+      className={`
+        flex transition-all duration-150 ease-in-out 
+        items-center justify-center 
+        rounded-lg w-full 
+        relative
+        ${expanded ? 'px-3 py-2' : 'h-9 w-9 md:h-8 md:w-8'}
+        ${active 
+          ? 'bg-secondary text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-8 before:w-1 before:rounded-r-lg' 
+          : 'text-secondary hover:bg-secondary/10'
+        }
+      `}
     >
       {icon}
       <span 
@@ -117,7 +144,6 @@ function RecipesIcon() {
     </svg>
   )
 }
-
 function MenusIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
@@ -139,5 +165,5 @@ function TasksIcon() {
     </svg>
   )
 }
-
 // Definir los demás iconos de manera similar...
+

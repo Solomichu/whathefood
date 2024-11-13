@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import Image from 'next/image'
+import { useSession } from 'next-auth/react'
 
 interface Dish {
   id: string;
@@ -24,9 +25,18 @@ interface Dish {
 
 interface CreatDishModalProps {
   onDishCreated: (newDish: Dish) => void;
+  userImage?: string;
+  username?: string;
+  userId?: string;
 }
 
-export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
+export default function CreatDishModal({ 
+  onDishCreated, 
+  userImage, 
+  username,
+  userId
+}: CreatDishModalProps) {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     name: '',
     instructions: '',
@@ -35,6 +45,8 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
     image: null as File | null,
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const isAdmin = session?.user?.role === 'admin';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,7 +70,7 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
@@ -71,23 +83,23 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
       }
     });
 
+    if (userId) {
+      form.append('createdById', userId);
+    }
+
     try {
       const response = await fetch('/api/dishes', {
         method: 'POST',
         body: form,
       });
       if (response.ok) {
-        const newDish = await response.json();
-        onDishCreated(newDish);
-        
-        alert('Plato creado exitosamente');
+        const { dish } = await response.json();
+        onDishCreated(dish);
       } else {
-        const errorData = await response.json();
-        alert(`Error al crear el plato: ${errorData.error}`);
+        throw new Error('Error al crear el plato');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al crear el plato');
     }
   };
 
@@ -119,21 +131,23 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
               </label>
               <Input id="prepTime" name="prepTime" value={formData.prepTime} onChange={handleChange} className="col-span-3" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="status" className="text-right">
-                Estado
-              </label>
-              <Select name="status" value={formData.status} onValueChange={(value) => handleSelectChange('status', value)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Selecciona un estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PENDING">Pendiente</SelectItem>
-                  <SelectItem value="APPROVED">Aprobado</SelectItem>
-                  <SelectItem value="REJECTED">Rechazado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {isAdmin && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="status" className="text-right">
+                  Estado
+                </label>
+                <Select name="status" value={formData.status} onValueChange={(value) => handleSelectChange('status', value)}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Selecciona un estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Pendiente</SelectItem>
+                    <SelectItem value="APPROVED">Aprobado</SelectItem>
+                    <SelectItem value="REJECTED">Rechazado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="image" className="text-right">
                 Imagen
@@ -178,9 +192,13 @@ export default function CreatDishModal({ onDishCreated }: CreatDishModalProps) {
                 </Badge>
                 <div className="flex items-center space-x-2">
                   <Avatar>
-                    <AvatarFallback>U</AvatarFallback>
+                    {userImage ? (
+                      <Image src={userImage} alt={username} layout="fill" />
+                    ) : (
+                      <AvatarFallback>{username[0]}</AvatarFallback>
+                    )}
                   </Avatar>
-                  <span className="text-sm">Usuario actual</span>
+                  <span className="text-sm">{session?.user?.name}</span>
                 </div>
               </div>
             </CardContent>

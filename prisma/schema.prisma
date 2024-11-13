@@ -45,6 +45,7 @@ model Dish {
   createdById          String?       
   likedBy              User[]        @relation("UserLikedDishes")
   savedBy              User[]        @relation("UserSavedDishes")
+  types                DishType[]    @relation("DishTypes")
 }
 
 model Task {
@@ -56,6 +57,13 @@ model Task {
   updatedAt   DateTime  @updatedAt
   createdBy   User      @relation("UserCreatedTasks", fields: [createdById], references: [id])
   createdById String
+}
+
+model DishType {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  dishes      Dish[]     @relation("DishTypes")
 }
 
 enum Role {

@@ -137,29 +137,66 @@ export async function POST(request: Request) {
         const createdById = formData.get('createdById') as string;
         const imageFile = formData.get('image') as File | null;
 
-        // Crear el nuevo plato sin la imagen primero
-        const newDish = await prisma.dish.create({
+        if (!createdById) {
+            throw new Error('Se requiere el ID del usuario creador');
+        }
+
+        // Crear el nuevo plato
+        let newDish = await prisma.dish.create({
             data: {
                 name,
                 instructions,
                 prepTime,
                 createdById,
+                status: 'PENDING',
             },
+            include: {
+                createdBy: {
+                    select: {
+                        id: true,
+                        username: true,
+                        image: true,
+                    }
+                }
+            }
         });
 
         // Manejar la carga de la imagen si existe
         if (imageFile) {
             const imagePath = await saveDishImage(imageFile, newDish.id);
-            await prisma.dish.update({
+            newDish = await prisma.dish.update({
                 where: { id: newDish.id },
                 data: { image: imagePath },
+                include: {
+                    createdBy: {
+                        select: {
+                            id: true,
+                            username: true,
+                            image: true,
+                        }
+                    }
+                }
             });
         }
 
-        return NextResponse.json({ message: 'Plato creado exitosamente', dish: newDish }, { status: 201 });
+        // Transformar los datos antes de enviarlos
+        const transformedDish = {
+            ...newDish,
+            creatorUsername: newDish.createdBy?.username || 'Usuario desconocido',
+            creatorImage: newDish.createdBy?.image || '/ruta/a/imagen/por/defecto.jpg',
+            createdById: newDish.createdBy?.id,
+            createdBy: undefined,
+        };
+
+        return NextResponse.json({ 
+            message: 'Plato creado exitosamente', 
+            dish: transformedDish 
+        }, { status: 201 });
     } catch (error) {
         console.error('Error al crear el plato:', error);
-        return NextResponse.json({ error: 'Error al crear el plato' }, { status: 500 });
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : 'Error al crear el plato' 
+        }, { status: 500 });
     }
 }
 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Eye, Edit, Trash2 } from "lucide-react"
+import { MoreVertical, Eye, Edit, Trash2, Search } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import CreatDishModal from './createdish_modal'
 import { Separator } from './ui/separator'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+import { useSession } from 'next-auth/react'
 
 interface Dish {
   id: string;
@@ -29,9 +30,12 @@ interface Dish {
   status: string;
   creatorUsername: string;
   creatorImage: string;
+  createdById?: string;
 }
 
 export default function AdmindashDishtableV2() {
+  const { data: session } = useSession();
+
   const router = useRouter();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
@@ -40,6 +44,25 @@ export default function AdmindashDishtableV2() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [updatedDishName, setUpdatedDishName] = useState('');
+  const [isApproveDrawerOpen, setIsApproveDrawerOpen] = useState(false);
+  const [approvedDishInfo, setApprovedDishInfo] = useState<{
+    name: string;
+    creatorUsername: string;
+    status: string;
+  } | null>(null);
+  const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false);
+  const [deletedDishInfo, setDeletedDishInfo] = useState<{
+    name: string;
+    creatorUsername: string;
+  } | null>(null);
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const [createdDishInfo, setCreatedDishInfo] = useState<{
+    name: string;
+    creatorUsername: string;
+    status: string;
+  } | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
 
   useEffect(() => {
     const fetchDishes = async () => {
@@ -58,6 +81,20 @@ export default function AdmindashDishtableV2() {
     fetchDishes();
   }, []);
 
+  useEffect(() => {
+    const filtered = dishes.filter(dish => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        dish.name?.toLowerCase().includes(searchLower) ||
+        dish.id?.toLowerCase().includes(searchLower) ||
+        dish.instructions?.toLowerCase().includes(searchLower) ||
+        dish.creatorUsername?.toLowerCase().includes(searchLower) ||
+        dish.createdById?.toLowerCase().includes(searchLower)
+      );
+    });
+    setFilteredDishes(filtered);
+  }, [searchTerm, dishes]);
+
   const handleView = (id: string) => {
     router.push(`/dishes/${id}`);
   };
@@ -68,21 +105,44 @@ export default function AdmindashDishtableV2() {
 
   const handleDelete = async (id: string) => {
     try {
+      const dishToDelete = dishes.find(dish => dish.id === id);
+      if (!dishToDelete) return;
+
       const response = await fetch(`/api/dishes?id=${id}`, {
         method: 'DELETE',
       });
+      
       if (response.ok) {
         setDishes(prevDishes => prevDishes.filter(dish => dish.id !== id));
         setIsDeleteDialogOpen(false);
         setDeletingDish(null);
-        alert('Plato eliminado exitosamente');
+        
+        // Configurar información para el drawer
+        setDeletedDishInfo({
+          name: dishToDelete.name,
+          creatorUsername: dishToDelete.creatorUsername || 'Usuario desconocido'
+        });
+        setIsDeleteDrawerOpen(true);
+
+        // Asegurarse de que el drawer se cierre correctamente
+        setTimeout(() => {
+          setIsDeleteDrawerOpen(false);
+          setDeletedDishInfo(null);
+          // Forzar la eliminación de la clase pointer-events del body
+          document.body.style.removeProperty('pointer-events');
+        }, 3000);
       } else {
         const errorData = await response.json();
-        alert(`Error al eliminar el plato: ${errorData.error}`);
+        throw new Error(errorData.error || 'Error al eliminar el plato');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al eliminar el plato');
+      alert(error instanceof Error ? error.message : 'Error al eliminar el plato');
+    } finally {
+      // Asegurarse de que el pointer-events se elimine incluso si hay un error
+      setTimeout(() => {
+        document.body.style.removeProperty('pointer-events');
+      }, 100);
     }
   };
 
@@ -92,7 +152,7 @@ export default function AdmindashDishtableV2() {
   };
 
   const handleDishUpdated = (updatedDish: Dish) => {
-    setDishes(prevDishes => prevDishes.map(d => 
+    setDishes(prevDishes => prevDishes.map(d =>
       d.id === updatedDish.id ? {
         ...updatedDish,
         creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
@@ -112,24 +172,163 @@ export default function AdmindashDishtableV2() {
     setIsCreateModalOpen(false);
   };
 
-  const handleDishCreated = (newDish: Dish) => {
-    setDishes(prevDishes => [...prevDishes, newDish]);
-    handleCloseCreateModal();
+  const handleDishCreated = async (newDish: Dish) => {
+    try {
+        // Asegurarse de que el nuevo plato tiene todos los campos necesarios
+        const completeDish: Dish = {
+            ...newDish,
+            creatorUsername: newDish.creatorUsername || session?.user?.name || 'Usuario desconocido',
+            creatorImage: newDish.creatorImage || session?.user?.image || '/ruta/a/imagen/por/defecto.jpg',
+            createdById: newDish.createdById || session?.user?.id,
+        };
+
+        // Actualizar el estado con el plato completo
+        setDishes(prevDishes => [...prevDishes, completeDish]);
+        handleCloseCreateModal();
+        
+        // Configurar información para el drawer
+        setCreatedDishInfo({
+            name: completeDish.name,
+            creatorUsername: completeDish.creatorUsername,
+            status: completeDish.status
+        });
+        setIsCreateDrawerOpen(true);
+
+        // Actualizar la lista completa de platos
+        const response = await fetch('/api/dishes');
+        if (response.ok) {
+            const data = await response.json();
+            setDishes(data.dishes);
+        }
+
+        // Cerrar el drawer después de 3 segundos
+        setTimeout(() => {
+            setIsCreateDrawerOpen(false);
+            setCreatedDishInfo(null);
+        }, 3000);
+    } catch (error) {
+        console.error('Error al manejar el plato creado:', error);
+    }
+};
+
+  const handleApprove = async (id: string) => {
+    try {
+      const currentDish = dishes.find(dish => dish.id === id);
+      if (!currentDish) return;
+
+      const formData = new FormData();
+      formData.append('name', currentDish.name);
+      formData.append('instructions', currentDish.instructions || '');
+      formData.append('prepTime', currentDish.prepTime || '');
+      formData.append('status', 'APPROVED');
+      
+      if (currentDish.createdById) {
+        formData.append('createdById', currentDish.createdById);
+      }
+
+      const response = await fetch(`/api/dishes?id=${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar el estado del plato');
+      }
+
+      const updatedDish = await response.json();
+      
+      setDishes(prevDishes => prevDishes.map(dish => 
+        dish.id === id ? {
+          ...updatedDish,
+          creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
+          creatorImage: updatedDish.creatorImage || '/ruta/a/imagen/por/defecto.jpg',
+        } : dish
+      ));
+      
+      setApprovedDishInfo({
+        name: updatedDish.name,
+        creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
+        status: 'APPROVED'
+      });
+      setIsApproveDrawerOpen(true);
+
+      setTimeout(() => {
+        setIsApproveDrawerOpen(false);
+        setApprovedDishInfo(null);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error instanceof Error ? error.message : 'Error al aprobar el plato');
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      const currentDish = dishes.find(dish => dish.id === id);
+      if (!currentDish) return;
+
+      const formData = new FormData();
+      formData.append('name', currentDish.name);
+      formData.append('instructions', currentDish.instructions || '');
+      formData.append('prepTime', currentDish.prepTime || '');
+      formData.append('status', 'REJECTED');
+      
+      if (currentDish.createdById) {
+        formData.append('createdById', currentDish.createdById);
+      }
+
+      const response = await fetch(`/api/dishes?id=${id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar el estado del plato');
+      }
+
+      const updatedDish = await response.json();
+      
+      setDishes(prevDishes => prevDishes.map(dish => 
+        dish.id === id ? {
+          ...updatedDish,
+          creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
+          creatorImage: updatedDish.creatorImage || '/ruta/a/imagen/por/defecto.jpg',
+        } : dish
+      ));
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error instanceof Error ? error.message : 'Error al rechazar el plato');
+    }
   };
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Recetas</h1>
-        <Button onClick={handleOpenCreateModal}>Crear</Button>
+        <Button onClick={handleOpenCreateModal}>Crear Plato</Button>
       </div>
-      <Separator className='mb-10'/>
+      <Separator className="mb-4" />
+      
+      <div className="relative mb-6">
+        <input
+          type="text"
+          placeholder="Buscar por nombre, ID, descripción o creador..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border rounded-md bg-background text-foreground"
+        />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {dishes.map((dish) => (
-          <Card key={dish.id} className="overflow-hidden">
+        {filteredDishes.map((dish) => (
+          <Card key={dish.id} className="flex flex-col">
             <CardHeader className="p-0">
-              <div className="relative h-40 bg-green-600">
+              <div className="relative h-40 w-full bg-green-600">
                 {dish.image ? (
                   <Image
                     src={dish.image}
@@ -144,78 +343,106 @@ export default function AdmindashDishtableV2() {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <CardTitle className="text-lg font-semibold">{dish.name}</CardTitle>
-                  <p className="text-sm text-gray-500 truncate">{dish.instructions}</p>
+            <CardContent className="p-4 flex-1">
+              <div className="flex flex-col h-full">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg font-semibold truncate">{dish.name}</CardTitle>
+                    <p className="text-sm text-gray-500 line-clamp-2">{dish.instructions}</p>
+                  </div>
+                  <Badge variant="secondary" className="ml-2 whitespace-nowrap">
+                    {dish.prepTime}'
+                  </Badge>
                 </div>
-                <Badge variant="secondary">{dish.prepTime}'</Badge>
-              </div>
-              <div className="flex justify-between items-center mt-4">
-                <Badge variant="outline" className={
-                  dish.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                  dish.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }>
-                  {dish.status}
-                </Badge>
-                <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarImage src={dish.creatorImage} alt={dish.creatorUsername || 'Usuario'} />
-                    <AvatarFallback>{(dish.creatorUsername || 'U').charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm">{dish.creatorUsername || 'Usuario desconocido'}</span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleView(dish.id)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        <span>Ver</span>
-                      </DropdownMenuItem>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Editar</span>
+                
+                <div className="mt-auto">
+                  <div className="flex justify-between items-center mt-4">
+                    <Badge variant="outline" className={
+                      dish.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                      dish.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }>
+                      {dish.status}
+                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={dish.creatorImage} alt={dish.creatorUsername || 'Usuario'} />
+                        <AvatarFallback>{(dish.creatorUsername || 'U').charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm truncate max-w-[100px]">{dish.creatorUsername || 'Usuario'}</span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleView(dish.id)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            <span>Ver</span>
                           </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[700px] !h-[50vh]">
-                          <EditDishDialog 
-                            dish={dish} 
-                            onDishUpdated={handleDishUpdated}
-                          />
-                        </DialogContent>
-                      </Dialog>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => {
-                            e.preventDefault();
-                            setDeletingDish(dish);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                          className='bg-red-500 text-white hover:!bg-red-700 hover:!text-white'
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Eliminar</span>
-                          </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                          {deletingDish && (
-                            <DeleteDishDialog
-                              dish={deletingDish}
-                              onConfirmDelete={handleDelete}
-                              onClose={handleCloseDeleteDialog}
-                            />
-                          )}
-                        </DialogContent>
-                      </Dialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                <span>Editar</span>
+                              </DropdownMenuItem>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[900px] !h-fit">
+                              <EditDishDialog
+                                dish={dish}
+                                onDishUpdated={handleDishUpdated}
+                              />
+                            </DialogContent>
+                          </Dialog>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => {
+                                e.preventDefault();
+                                setDeletingDish(dish);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                                className='bg-red-500 text-white hover:!bg-red-700 hover:!text-white'
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Eliminar</span>
+                              </DropdownMenuItem>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                              {deletingDish && (
+                                <DeleteDishDialog
+                                  dish={deletingDish}
+                                  onConfirmDelete={handleDelete}
+                                  onClose={handleCloseDeleteDialog}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                  
+                  {dish.status === 'PENDING' && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm text-gray-600">Este plato está pendiente de revisión</p>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => handleApprove(dish.id)}
+                          className="bg-green-500 hover:bg-green-600 text-white flex-1"
+                        >
+                          Aceptar
+                        </Button>
+                        <Button 
+                          onClick={() => handleReject(dish.id)}
+                          variant="destructive"
+                          className="bg-red-500 hover:bg-red-600 text-white flex-1"
+                        >
+                          Rechazar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -243,9 +470,89 @@ export default function AdmindashDishtableV2() {
       </Drawer>
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="sm:max-w-[900px] !h-fit">
-          <CreatDishModal onDishCreated={handleDishCreated} />
+          <CreatDishModal 
+            onDishCreated={handleDishCreated} 
+            userImage={session?.user?.image} 
+            username={session?.user?.name}
+            userId={session?.user?.id}
+            statusOptions={['PENDING', 'APPROVED', 'REJECTED']}
+          />
         </DialogContent>
       </Dialog>
+      <Drawer open={isApproveDrawerOpen} onOpenChange={setIsApproveDrawerOpen}>
+        <DrawerContent className="flex w-fit mx-auto px-10">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="bg-green-500 text-white px-4 py-2 rounded-lg mb-2">
+              ¡Plato Aprobado!
+            </DrawerTitle>
+            <DrawerDescription className="space-y-2">
+              <p className="font-medium text-lg">{approvedDishInfo?.name}</p>
+              <div className="flex items-center justify-center gap-2">
+                <Badge variant="outline" className="bg-green-100 text-green-800">
+                  {approvedDishInfo?.status}
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-500">
+                Creado por: {approvedDishInfo?.creatorUsername}
+              </p>
+            </DrawerDescription>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>
+      <Drawer 
+        open={isDeleteDrawerOpen} 
+        onOpenChange={(open) => {
+          setIsDeleteDrawerOpen(open);
+          if (!open) {
+            setTimeout(() => {
+              document.body.style.removeProperty('pointer-events');
+            }, 100);
+          }
+        }}
+      >
+        <DrawerContent className="flex w-fit mx-auto px-10">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="bg-red-500 text-white px-4 py-2 rounded-lg mb-2">
+              Plato Eliminado
+            </DrawerTitle>
+            <DrawerDescription className="space-y-2">
+              <p className="font-medium text-lg">{deletedDishInfo?.name}</p>
+              <div className="flex items-center justify-center gap-2">
+                <Badge variant="outline" className="bg-red-100 text-red-800">
+                  ELIMINADO
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-500">
+                Creado por: {deletedDishInfo?.creatorUsername}
+              </p>
+            </DrawerDescription>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>
+      <Drawer open={isCreateDrawerOpen} onOpenChange={setIsCreateDrawerOpen}>
+        <DrawerContent className="flex w-fit mx-auto px-10">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="bg-primary text-secondary px-4 py-2 rounded-lg mb-2">
+              ¡Plato Creado!
+            </DrawerTitle>
+            <DrawerDescription className="space-y-2">
+              <p className="font-medium text-lg">{createdDishInfo?.name}</p>
+              <div className="flex items-center justify-center gap-2">
+                <Badge variant="outline" className={
+                  createdDishInfo?.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                  createdDishInfo?.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }>
+                  {createdDishInfo?.status}
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-500">
+                Creado por: {createdDishInfo?.creatorUsername}
+              </p>
+            </DrawerDescription>
+          </DrawerHeader>
+        </DrawerContent>
+      </Drawer>
     </div>
-  )  
+  )
 }

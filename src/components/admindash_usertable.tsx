@@ -176,7 +176,7 @@ export default function UserTable() {
         form.append('password', formData.password);
         form.append('role', formData.role); // Asegúrate de incluir el rol
         if (formData.image instanceof File) {
-            form.append('image', formData.image);
+            form.append('image', formData.image); 
         }
 
         try {
@@ -185,7 +185,6 @@ export default function UserTable() {
                 body: form,
             });
             if (response.ok) {
-                alert('Usuario creado exitosamente');
                 fetchUsers(); // Actualizar la lista de usuarios
                 setIsDialogOpen(false);
             } else {

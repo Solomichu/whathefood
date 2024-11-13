@@ -9,7 +9,7 @@ interface Dish {
   image: string | null;
   prepTime: string | null;
   status: string;
-  createdBy: {
+  createdBy?: {
     id: string;
     username: string | null;
   };
@@ -115,8 +115,8 @@ export default function DishList_Page() {
             <p><strong>Id:</strong> {dish.id || 'No especificado'}</p>
             <p><strong>Tiempo de preparación:</strong> {dish.prepTime || 'No especificado'}</p>
             <p><strong>Estado:</strong> {dish.status}</p>
-            <p><strong>Creado por:</strong> {dish.createdBy.username || 'Usuario desconocido'}</p>
-            <p><strong>Creado por UserID:</strong> {dish.createdBy.id || 'Usuario desconocido'}</p>
+            <p><strong>Creado por:</strong> {dish.createdBy?.username || 'Usuario desconocido'}</p>
+            <p><strong>Creado por UserID:</strong> {dish.createdBy?.id || 'Usuario desconocido'}</p>
             <Link href={`/dishes/${dish.id}`} className="text-blue-500 hover:underline">
               Ver detalles
             </Link>

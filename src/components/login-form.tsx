@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Link from 'next/link'
 
 interface Dish {
 	id: string;
@@ -71,7 +72,7 @@ export default function LoginForm() {
 				if (session?.user?.role === 'ADMIN') {
 					router.push('/admin/dashboard')
 				} else {
-					router.push('/')
+					router.push('/dashboard')
 				}
 			}
 		} catch (error) {
@@ -137,6 +138,9 @@ export default function LoginForm() {
 								Iniciar sesión
 							</Button>
 						</form>
+						<label className="text-sm font-medium">
+							No tiene cuenta? <Link href="/register" className='text-primary'>Cree una</Link>
+						</label>
 					</CardContent>
 				</Card>
 			</div>

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Link from 'next/link';
 
 interface Dish {
   id: string;
@@ -51,7 +52,7 @@ export default function DishPage() {
 
     const fetchRelatedDishes = async (userId: string) => {
       try {
-        const response = await fetch(`/api/dishes?userId=${userId}&limit=3`);
+        const response = await fetch(`/api/dishes?userId=${userId}&limit=4`);
         if (response.ok) {
           const data = await response.json();
           setRelatedDishes(data.dishes.filter((d: Dish) => d.id !== id));
@@ -96,23 +97,42 @@ export default function DishPage() {
           <h2 className="text-2xl font-bold mb-4">Igual le interesa</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {relatedDishes.map((relatedDish) => (
-              <div key={relatedDish.id} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="h-40 bg-cover bg-center" style={{backgroundImage: `url(${relatedDish.image || '/placeholder.jpg'})`}}></div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-1">{relatedDish.name}</h3>
-                  <p className="text-sm text-gray-500 mb-2 truncate">{relatedDish.instructions}</p>
-                  <div className="flex justify-between items-center">
-                    <Button variant="outline" size="sm">Aceptar</Button>
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src={relatedDish.createdBy?.image || undefined} alt={relatedDish.createdBy?.username || 'Usuario'} />
-                        <AvatarFallback>{relatedDish.createdBy?.username?.[0] || 'U'}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm">{relatedDish.createdBy?.username || 'Usuario desconocido'}</span>
+              <Link 
+                href={`/dishes/${relatedDish.id}`} 
+                key={relatedDish.id}
+                className="block transition-transform hover:scale-105"
+              >
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                  <div 
+                    className="h-40 bg-cover bg-center" 
+                    style={{backgroundImage: `url(${relatedDish.image || '/placeholder.jpg'})`}}
+                  ></div>
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-1">{relatedDish.name}</h3>
+                    <p className="text-sm text-gray-500 mb-2 truncate">
+                      {relatedDish.instructions}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <Button variant="default" size="sm">Ver plato</Button>
+                      <div className="flex items-center space-x-2">
+                      <span className="text-sm">
+                          {relatedDish.createdBy?.username || 'Usuario desconocido'}
+                        </span>
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage 
+                            src={relatedDish.createdBy?.image || undefined} 
+                            alt={relatedDish.createdBy?.username || 'Usuario'} 
+                          />
+                          <AvatarFallback>
+                            {relatedDish.createdBy?.username?.[0] || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
