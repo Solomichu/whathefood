@@ -20,6 +20,13 @@ import CreatDishModal from './createdish_modal'
 import { Separator } from './ui/separator'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import { useSession } from 'next-auth/react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface Dish {
   id: string;
@@ -63,6 +70,7 @@ export default function AdmindashDishtableV2() {
   } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   useEffect(() => {
     const fetchDishes = async () => {
@@ -84,16 +92,19 @@ export default function AdmindashDishtableV2() {
   useEffect(() => {
     const filtered = dishes.filter(dish => {
       const searchLower = searchTerm.toLowerCase();
-      return (
+      const matchesSearch = 
         dish.name?.toLowerCase().includes(searchLower) ||
         dish.id?.toLowerCase().includes(searchLower) ||
         dish.instructions?.toLowerCase().includes(searchLower) ||
         dish.creatorUsername?.toLowerCase().includes(searchLower) ||
-        dish.createdById?.toLowerCase().includes(searchLower)
-      );
+        dish.createdById?.toLowerCase().includes(searchLower);
+
+      const matchesStatus = statusFilter === 'ALL' || dish.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
     });
     setFilteredDishes(filtered);
-  }, [searchTerm, dishes]);
+  }, [searchTerm, dishes, statusFilter]);
 
   const handleView = (id: string) => {
     router.push(`/dishes/${id}`);
@@ -107,6 +118,9 @@ export default function AdmindashDishtableV2() {
     try {
       const dishToDelete = dishes.find(dish => dish.id === id);
       if (!dishToDelete) return;
+
+      // Asegurarse de que pointer-events se elimine antes de la operación
+      document.body.style.removeProperty('pointer-events');
 
       const response = await fetch(`/api/dishes?id=${id}`, {
         method: 'DELETE',
@@ -124,12 +138,10 @@ export default function AdmindashDishtableV2() {
         });
         setIsDeleteDrawerOpen(true);
 
-        // Asegurarse de que el drawer se cierre correctamente
+        // Cerrar el drawer después de 3 segundos
         setTimeout(() => {
           setIsDeleteDrawerOpen(false);
           setDeletedDishInfo(null);
-          // Forzar la eliminación de la clase pointer-events del body
-          document.body.style.removeProperty('pointer-events');
         }, 3000);
       } else {
         const errorData = await response.json();
@@ -138,11 +150,6 @@ export default function AdmindashDishtableV2() {
     } catch (error) {
       console.error('Error:', error);
       alert(error instanceof Error ? error.message : 'Error al eliminar el plato');
-    } finally {
-      // Asegurarse de que el pointer-events se elimine incluso si hay un error
-      setTimeout(() => {
-        document.body.style.removeProperty('pointer-events');
-      }, 100);
     }
   };
 
@@ -313,15 +320,28 @@ export default function AdmindashDishtableV2() {
       </div>
       <Separator className="mb-4" />
       
-      <div className="relative mb-6">
-        <input
-          type="text"
-          placeholder="Buscar por nombre, ID, descripción o creador..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md bg-background text-foreground"
-        />
-        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <div className="flex gap-4 mb-6">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar por nombre, ID, descripción o creador..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md bg-background text-foreground"
+          />
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        </div>
+        <Select onValueChange={setStatusFilter} defaultValue="ALL">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filtrar por estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todos</SelectItem>
+            <SelectItem value="APPROVED">Aceptado</SelectItem>
+            <SelectItem value="PENDING">Pendiente</SelectItem>
+            <SelectItem value="REJECTED">Rechazado</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -503,10 +523,9 @@ export default function AdmindashDishtableV2() {
         open={isDeleteDrawerOpen} 
         onOpenChange={(open) => {
           setIsDeleteDrawerOpen(open);
+          // Asegurarse de que pointer-events se elimine al cerrar el drawer
           if (!open) {
-            setTimeout(() => {
-              document.body.style.removeProperty('pointer-events');
-            }, 100);
+            document.body.style.removeProperty('pointer-events');
           }
         }}
       >

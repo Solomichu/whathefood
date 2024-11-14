@@ -26,6 +26,7 @@ interface Dish {
 interface EditDishDialogProps {
   dish: Dish;
   onDishUpdated: (updatedDish: Dish) => void;
+  onClose?: () => void;
 }
 
 interface User {
@@ -33,7 +34,7 @@ interface User {
   username: string;
 }
 
-export default function EditDishDialog({ dish, onDishUpdated }: EditDishDialogProps) {
+export default function EditDishDialog({ dish, onDishUpdated, onClose }: EditDishDialogProps) {
   const { data: session } = useSession();
   const [formData, setFormData] = useState({
     name: dish.name,
@@ -112,6 +113,7 @@ export default function EditDishDialog({ dish, onDishUpdated }: EditDishDialogPr
       if (response.ok) {
         const updatedDish = await response.json();
         onDishUpdated(updatedDish);
+        onClose?.();
       } else {
         const errorData = await response.json();
         alert(`Error al actualizar el plato: ${errorData.error}`);

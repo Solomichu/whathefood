@@ -51,7 +51,7 @@ export default function Page({ children }: { children: ReactNode }) {
   }
 
   return (
-    <main className="flex flex-row">
+    <main className="flex flex-row bg-secondary">
       <AdminNavbar onNavClick={handleNavClick} activePage={activeNavItem} />
       <main className="w-full p-10">
         {currentPage}

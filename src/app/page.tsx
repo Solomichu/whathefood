@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, Clock, Star, ChefHat, Users, Utensils, Search, ArrowRight, Instagram, Twitter, Facebook } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface Dish {
   id: string;
@@ -19,6 +21,9 @@ interface Dish {
 }
 
 export default function HomePage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [searchQuery, setSearchQuery] = useState('');
   const [featuredDishes, setFeaturedDishes] = useState<Dish[]>([]);
   
   useEffect(() => {
@@ -36,23 +41,32 @@ export default function HomePage() {
     fetchFeaturedDishes();
   }, []);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (session) {
+      // Redirigir a dashboard con el término de búsqueda como parámetro
+      router.push(`/dashboard?search=${encodeURIComponent(searchQuery)}`);
+    } else {
+      // Redirigir al login
+      router.push('/login');
+    }
+  };
+
   return (
     <main className="min-h-screen">
       <MainNavbar />
       
       {/* Hero Section con Buscador */}
-      <section className="relative h-[90vh] bg-black">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/static/dishes/cabonara04.jpg"
-            alt="Hero background"
-            fill
-            className="object-cover opacity-60"
-            priority
-          />
-        </div>
+      <section className="relative h-[90vh] bg-black bg-fixed bg-cover bg-center"
+        style={{
+          backgroundImage: 'url("/images/static/dishes/cabonara04.jpg")',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40 z-0" />
 
-        <div className="relative z-10 container mx-auto h-full flex items-center">
+        <div className="relative z-10 container mx-auto h-full flex items-center p-20">
           <div className="max-w-3xl">
             <h1 className="text-7xl font-bold text-secondary mb-6">
               Descubre el arte de la <span className="text-primary">cocina</span>
@@ -60,18 +74,20 @@ export default function HomePage() {
             <p className="text-xl text-secondary/80 mb-8">
               Explora recetas únicas creadas por chefs apasionados y comparte tus propias creaciones culinarias.
             </p>
-            <div className="flex gap-4 mb-8">
+            <form onSubmit={handleSearch} className="flex gap-4 mb-8">
               <div className="flex-1 relative">
                 <Input 
                   placeholder="Buscar recetas..." 
                   className="w-full h-14 pl-12 pr-4 rounded-lg bg-secondary/90"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" />
               </div>
-              <Button size="lg" className="h-14 bg-primary hover:bg-primary/90 text-black px-8">
+              <Button type="submit" size="lg" className="h-14 bg-primary hover:bg-primary/90 text-black px-8">
                 Buscar
               </Button>
-            </div>
+            </form>
             <div className="flex gap-8 text-secondary/80">
               <div className="flex items-center gap-2">
                 <ChefHat className="h-6 w-6" />

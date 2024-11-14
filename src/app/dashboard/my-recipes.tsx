@@ -12,12 +12,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { DialogWrapper } from "@/components/ui/dialog-wrapper"
+import { DialogContent , DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import EditDishDialog from '@/components/editdish_dialog'
 import CreatDishModal from '@/components/createdish_modal'
 import { Separator } from '@/components/ui/separator'
 import { useSession } from 'next-auth/react'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
+import { DrawerWrapper } from "@/components/ui/drawer-wrapper"
 
 interface Dish {
   id: string;
@@ -233,20 +235,14 @@ export default function MyRecipes() {
                               <Eye className="mr-2 h-4 w-4" />
                               <span>Ver</span>
                             </DropdownMenuItem>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  <span>Editar</span>
-                                </DropdownMenuItem>
-                              </DialogTrigger>
+                            <DialogWrapper>
                               <DialogContent className="sm:max-w-[900px] !h-fit">
                                 <EditDishDialog
                                   dish={dish}
                                   onDishUpdated={handleDishCreated} // Cambia esto si es necesario
                                 />
                               </DialogContent>
-                            </Dialog>
+                            </DialogWrapper>
                             <DropdownMenuItem onClick={() => {
                               setDishToDelete(dish);
                               setIsDeleteDialogOpen(true);
@@ -266,7 +262,7 @@ export default function MyRecipes() {
         </div>
       )}
 
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+      <DialogWrapper open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="sm:max-w-[900px] !h-fit">
           <CreatDishModal 
             onDishCreated={handleDishCreated} 
@@ -275,9 +271,9 @@ export default function MyRecipes() {
             userId={session?.user?.id}
           />
         </DialogContent>
-      </Dialog>
+      </DialogWrapper>
 
-      <Drawer open={isCreateDrawerOpen} onOpenChange={setIsCreateDrawerOpen}>
+      <DrawerWrapper open={isCreateDrawerOpen} onOpenChange={setIsCreateDrawerOpen}>
         <DrawerContent className="flex w-fit mx-auto px-10">
           <DrawerHeader className="text-center">
             <DrawerTitle className="bg-primary text-secondary px-4 py-2 rounded-lg mb-2">
@@ -300,9 +296,9 @@ export default function MyRecipes() {
             </DrawerDescription>
           </DrawerHeader>
         </DrawerContent>
-      </Drawer>
+      </DrawerWrapper>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <DialogWrapper open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar eliminación</DialogTitle>
@@ -323,9 +319,9 @@ export default function MyRecipes() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </DialogWrapper>
 
-      <Drawer 
+      <DrawerWrapper 
         open={isDeleteDrawerOpen} 
         onOpenChange={(open) => {
           setIsDeleteDrawerOpen(open);
@@ -354,7 +350,7 @@ export default function MyRecipes() {
             </DrawerDescription>
           </DrawerHeader>
         </DrawerContent>
-      </Drawer>
+      </DrawerWrapper>
     </div>
   )
 }

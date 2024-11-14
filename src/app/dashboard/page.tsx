@@ -13,6 +13,8 @@ export default function Page({ children }: { children: ReactNode }) {
   const [currentPage, setCurrentPage] = useState<ReactNode>(<Default />)
 
   const handleNavClick = (page: string) => {
+    document.body.style.removeProperty('pointer-events');
+    
     switch (page) {
       default:
         setCurrentPage(<Default />)
@@ -38,7 +40,7 @@ export default function Page({ children }: { children: ReactNode }) {
   }
 
   return (
-    <main className="flex flex-row">
+    <main className="flex flex-row bg-secondary">
       <UserNavbar onNavClick={handleNavClick} />
       <main className="w-full p-10">
         {currentPage}

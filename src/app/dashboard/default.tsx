@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Heart } from 'lucide-react'
+import { Heart, Search } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import UserNavbar from '@/components/user-navbar'
 import { SidebarProvider } from '@/components/ui/sidebar'
@@ -25,8 +26,11 @@ interface Dish {
 
 export default function Default() {
   const { data: session } = useSession()
+  const searchParams = useSearchParams()
   const [dishes, setDishes] = useState<Dish[]>([])
   const [activeTab, setActiveTab] = useState("all")
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
 
   useEffect(() => {
     const fetchDishes = async () => {
@@ -43,21 +47,45 @@ export default function Default() {
     fetchDishes()
   }, [])
 
+  useEffect(() => {
+    const filtered = dishes.filter(dish => {
+      const searchLower = searchTerm.toLowerCase();
+      return dish.name?.toLowerCase().includes(searchLower) ||
+             dish.instructions?.toLowerCase().includes(searchLower) ||
+             dish.creatorUsername?.toLowerCase().includes(searchLower);
+    });
+    setFilteredDishes(filtered);
+  }, [searchTerm, dishes]);
+
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl) {
+      setSearchTerm(searchFromUrl);
+    }
+  }, [searchParams]);
+
   return (
     <div className="container mx-auto p-8">
-        
+      <div className="relative w-full max-w-xl mx-auto mb-8">
+        <input
+          type="text"
+          placeholder="Buscar por nombre de plato, descripción o creador..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border rounded-md bg-background text-foreground"
+        />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      </div>
+
       <Tabs defaultValue="all" className="w-full">
         <div className="flex justify-between items-center mb-6">
-          <TabsList>
-            <TabsTrigger value="all">Todas las recetas</TabsTrigger>
-            <TabsTrigger value="popular">Populares</TabsTrigger>
-            <TabsTrigger value="new">Nuevas</TabsTrigger>
-          </TabsList>
+          {/* TabsList */}
+          
         </div>
 
         <TabsContent value="all" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dishes.map((dish) => (
+            {filteredDishes.map((dish) => (
               <Card key={dish.id} className="overflow-hidden">
                 <div className="relative h-48 w-full">
                   {dish.image ? (
@@ -104,3 +132,12 @@ export default function Default() {
     </div>
   )
 }
+
+/*
+
+<TabsList>
+            <TabsTrigger value="all">Todas las recetas</TabsTrigger>
+            <TabsTrigger value="popular">Populares</TabsTrigger>
+            <TabsTrigger value="new">Nuevas</TabsTrigger>
+          </TabsList>
+*/

@@ -53,24 +53,55 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
+        
+        // Obtener los campos del FormData
         const name = formData.get('name') as string;
         const description = formData.get('description') as string;
         const priority = formData.get('priority') as string;
         const createdById = formData.get('createdById') as string;
 
+        if (!name || !createdById) {
+            return NextResponse.json({ 
+                error: 'Nombre y creador son requeridos' 
+            }, { status: 400 });
+        }
+
+        // Crear la tarea usando los campos correctos según el schema
         const newTask = await prisma.task.create({
             data: {
                 name,
-                description,
+                description: description || null,
                 priority,
                 createdById,
             },
+            include: {
+                createdBy: {
+                    select: {
+                        id: true,
+                        username: true,
+                        image: true,
+                    }
+                }
+            }
         });
 
-        return NextResponse.json({ message: 'Tarea creada exitosamente', task: newTask }, { status: 201 });
+        // Transformar la respuesta similar a como se hace con los platos
+        const transformedTask = {
+            ...newTask,
+            creatorUsername: newTask.createdBy?.username || 'Usuario desconocido',
+            creatorImage: newTask.createdBy?.image || '/ruta/a/imagen/por/defecto.jpg',
+            createdBy: undefined, // Eliminar el objeto createdBy original
+        };
+
+        return NextResponse.json({ 
+            message: 'Tarea creada exitosamente', 
+            task: transformedTask 
+        }, { status: 201 });
     } catch (error) {
         console.error('Error al crear la tarea:', error);
-        return NextResponse.json({ error: 'Error al crear la tarea' }, { status: 500 });
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : 'Error al crear la tarea' 
+        }, { status: 500 });
     }
 }
 

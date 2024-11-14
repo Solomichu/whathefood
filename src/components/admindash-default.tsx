@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Clock, Users, Utensils } from "lucide-react";
+import { Clock, Users, Utensils, CheckSquare } from "lucide-react";
 
 interface DashboardStats {
   pendingDishes: number;
   totalDishes: number;
   totalUsers: number;
+  totalTasks: number;
   userGrowth: { date: string; count: number; }[];
 }
 
@@ -20,6 +21,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
     pendingDishes: 0,
     totalDishes: 0,
     totalUsers: 0,
+    totalTasks: 0,
     userGrowth: []
   });
 
@@ -28,20 +30,22 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
       setIsLoading(true);
       setError(null);
       
-      const [pendingDishesResponse, allDishesResponse, usersResponse] = await Promise.all([
+      const [pendingDishesResponse, allDishesResponse, usersResponse, tasksResponse] = await Promise.all([
         fetch('/api/dishes?status=PENDING'),
         fetch('/api/dishes'),
-        fetch('/api/users')
+        fetch('/api/users'),
+        fetch(`/api/tasks?userId=${session?.user?.id}`)
       ]);
 
-      if (!pendingDishesResponse.ok || !allDishesResponse.ok || !usersResponse.ok) {
+      if (!pendingDishesResponse.ok || !allDishesResponse.ok || !usersResponse.ok || !tasksResponse.ok) {
         throw new Error('Error al obtener los datos');
       }
 
-      const [pendingDishesData, allDishesData, usersData] = await Promise.all([
+      const [pendingDishesData, allDishesData, usersData, tasksData] = await Promise.all([
         pendingDishesResponse.json(),
         allDishesResponse.json(),
-        usersResponse.json()
+        usersResponse.json(),
+        tasksResponse.json()
       ]);
 
       const last7Days = Array.from({length: 7}, (_, i) => {
@@ -66,6 +70,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
         pendingDishes: pendingDishesData.dishes.length,
         totalDishes: allDishesData.dishes.length,
         totalUsers: usersData.length,
+        totalTasks: tasksData.length,
         userGrowth
       });
     } catch (error) {
@@ -103,7 +108,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <Card 
               className="bg-card h-[150px] cursor-pointer hover:shadow-lg transition-all duration-200"
               onClick={() => onViewChange?.('recipes')}
@@ -166,6 +171,28 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
                 </div>
                 <div className="text-6xl font-bold text-primary">
                   {stats.totalUsers}
+                </div>
+              </div>
+            </Card>
+
+            <Card 
+              className="bg-card h-[150px] cursor-pointer hover:shadow-lg transition-all duration-200"
+              onClick={() => onViewChange?.('my-tasks')}
+            >
+              <div className="flex justify-between items-center p-6 h-full">
+                <div className="flex items-center gap-4">
+                  <CheckSquare className="h-10 w-10 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg font-medium">
+                      Mis Tareas
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Tareas creadas
+                    </p>
+                  </div>
+                </div>
+                <div className="text-6xl font-bold text-primary">
+                  {stats.totalTasks}
                 </div>
               </div>
             </Card>

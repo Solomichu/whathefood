@@ -25,6 +25,11 @@ interface DeleteDishDialogProps {
 }
 
 export default function DeleteDishDialog({ dish, onConfirmDelete, onClose }: DeleteDishDialogProps) {
+  const handleConfirmDelete = () => {
+    onConfirmDelete(dish.id);
+    onClose?.();
+  };
+
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
@@ -80,12 +85,19 @@ export default function DeleteDishDialog({ dish, onConfirmDelete, onClose }: Del
 
       <DialogFooter className="mt-4">
         <DialogClose asChild>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              onClose();
+            }}
+          >
+            Cancelar
+          </Button>
         </DialogClose>
-        <Button variant="destructive" onClick={() => {
-          onConfirmDelete(dish.id);
-          onClose(); // Cerramos el diálogo después de confirmar la eliminación
-        }}>
+        <Button 
+          variant="destructive" 
+          onClick={handleConfirmDelete}
+        >
           Eliminar
         </Button>
       </DialogFooter>
