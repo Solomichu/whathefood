@@ -24,6 +24,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
     totalTasks: 0,
     userGrowth: []
   });
+  const [userTasksCount, setUserTasksCount] = useState(0);
 
   const fetchStats = async () => {
     try {
@@ -73,6 +74,10 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
         totalTasks: tasksData.length,
         userGrowth
       });
+
+      const userTasksResponse = await fetch(`/api/tasks?userId=${session?.user?.id}`);
+      const userTasksData = await userTasksResponse.json();
+      setUserTasksCount(userTasksData.length);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error al obtener estadísticas');
     } finally {
@@ -94,6 +99,9 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
           </h1>
           <p className="text-muted-foreground">
             Panel de administración de TuCocina
+          </p>
+          <p className="text-muted-foreground">
+            Tienes {userTasksCount} tareas
           </p>
         </div>
       </div>
@@ -177,7 +185,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
 
             <Card 
               className="bg-card h-[150px] cursor-pointer hover:shadow-lg transition-all duration-200"
-              onClick={() => onViewChange?.('my-tasks')}
+              onClick={() => onViewChange?.('tasks')}
             >
               <div className="flex justify-between items-center p-6 h-full">
                 <div className="flex items-center gap-4">

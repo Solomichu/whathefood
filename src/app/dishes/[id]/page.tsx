@@ -115,7 +115,7 @@ export default function DishPage() {
                     <div className="flex justify-between items-center">
                       <Button variant="default" size="sm">Ver plato</Button>
                       <div className="flex items-center space-x-2">
-                      <span className="text-sm">
+                        <span className="text-sm">
                           {relatedDish.createdBy?.username || 'Usuario desconocido'}
                         </span>
                         <Avatar className="w-6 h-6">

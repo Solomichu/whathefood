@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const userId = searchParams.get('userId');
 
     if (id) {
         try {
@@ -29,6 +30,24 @@ export async function GET(request: Request) {
         } catch (error) {
             console.error('Error al obtener la tarea:', error);
             return NextResponse.json({ error: 'Error al obtener la tarea' }, { status: 500 });
+        }
+    } else if (userId) {
+        try {
+            const tasks = await prisma.task.findMany({
+                where: { createdById: userId },
+                include: {
+                    createdBy: {
+                        select: {
+                            id: true,
+                            username: true,
+                        },
+                    },
+                },
+            });
+            return NextResponse.json(tasks);
+        } catch (error) {
+            console.error('Error al obtener las tareas:', error);
+            return NextResponse.json({ error: 'Error al obtener las tareas' }, { status: 500 });
         }
     } else {
         try {

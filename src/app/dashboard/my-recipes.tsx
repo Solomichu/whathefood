@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Eye, Edit, Trash2 } from "lucide-react"
+import { MoreVertical, Eye, Edit, Trash2, Router } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,8 @@ import CreatDishModal from '@/components/createdish_modal'
 import { Separator } from '@/components/ui/separator'
 import { useSession } from 'next-auth/react'
 import { DrawerWrapper } from "@/components/ui/drawer-wrapper"
+import { useRouter } from 'next/navigation'
+
 
 interface Dish {
   id: string;
@@ -35,6 +37,7 @@ interface Dish {
 
 export default function MyRecipes() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -127,7 +130,10 @@ export default function MyRecipes() {
       console.error('Error al crear el plato:', error);
     }
   };
-
+  const handleView = (id: string) => {
+    console.log("Redirigiendo a:", `/dishes/${id}`);
+    router.push(`/dishes/${id}`);
+  };
   const handleDeleteDish = async (id: string) => {
     try {
       const dishToDelete = dishes.find(dish => dish.id === id);
@@ -231,7 +237,7 @@ export default function MyRecipes() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => router.push(`/dishes/${dish.id}`)}>
+                          <DropdownMenuItem onClick={() => handleView(dish.id)}>
                               <Eye className="mr-2 h-4 w-4" />
                               <span>Ver</span>
                             </DropdownMenuItem>
