@@ -41,7 +41,7 @@ export default function UserNavbar() {
         {/* Navegación y perfil - 1/3 */}
         <div className="w-1/3 flex items-center justify-end space-x-8">
           <Link href="/dashboard" className="text-white hover:text-gray-200">
-            Dashboard
+            Explorar Recetas
           </Link>
           <Link href="/about" className="text-white hover:text-gray-200">
             Sobre Nosotros

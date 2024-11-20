@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-
+import Link from 'next/link';
 interface Dish {
   id: string;
   name: string;
@@ -214,7 +214,7 @@ export default function HomePage() {
       <section className="relative py-20 bg-black text-secondary">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/static/cta-bg.jpg"
+            src="/images/static/dishes/tacos04.webp"
             alt="CTA background"
             fill
             className="object-cover opacity-30"
@@ -225,36 +225,37 @@ export default function HomePage() {
           <p className="text-xl mb-8 max-w-2xl mx-auto">
             Únete a nuestra comunidad y comparte tus creaciones culinarias con el mundo
           </p>
-          <Button size="lg" className="bg-primary hover:bg-primary/90 text-black px-8">
+          <Button size="lg" className="bg-primary hover:bg-primary/90 text-secondary px-8">
             Empezar Ahora
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-secondary py-16">
+      <footer className="bg-green-900 text-secondary py-16">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
               <h3 className="text-xl font-bold mb-4">Sobre Nosotros</h3>
-              <p className="text-gray-400">
+              <p className="text-secondary">
                 Plataforma líder en compartir recetas y experiencias culinarias
               </p>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-4">Enlaces Rápidos</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>Inicio</li>
-                <li>Explorar Recetas</li>
-                <li>Categorías</li>
-                <li>Chefs</li>
+                <li><Link href="/">Inicio</Link></li>
+                <li><Link href="/dashboard">Dashboard</Link></li>
+                <li><Link href="/admin/dashboard">Administración</Link></li>
+                <li><Link href="/about">Sobre nosotros</Link></li>
+                <li><Link href="/faq">FAQ</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-4">Contacto</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>info@tucocina.com</li>
-                <li>+34 123 456 789</li>
+                <li>info@whathefood.es</li>
+                <li>+34 999 999 999</li>
                 <li>Madrid, España</li>
               </ul>
             </div>
@@ -268,7 +269,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 TuCocina. Todos los derechos reservados.</p>
+            <p>&copy; 2024 WHATHEFOOD. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

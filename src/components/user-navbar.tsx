@@ -4,14 +4,6 @@ import { ModeToggle } from './theme-toggle-button'
 import { signOut, useSession } from "next-auth/react"
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { User, LogOut } from "lucide-react";
 
 interface AdminNavbarProps {
   onNavClick: (page: string) => void
@@ -42,7 +34,6 @@ export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
         <NavButton onClick={() => handleNavClick('default')} icon={<RecipesIcon />} label="Recetas" expanded={isExpanded} active={activePage === 'recipes'} />
         <NavButton onClick={() => handleNavClick('favorites')} icon={<HeartIcon />} label="Favoritos" expanded={isExpanded} active={activePage === 'favorites'} />
         <NavButton onClick={() => handleNavClick('my-recipes')} icon={<ChefIcon />} label="Mis Recetas" expanded={isExpanded} active={activePage === 'my-recipes'} />
-        <NavButton onClick={() => handleNavClick('my-menus')} icon={<MenusIcon />} label="Mis Menús" expanded={isExpanded} active={activePage === 'my-menus'} />
         <NavButton onClick={() => handleNavClick('my-tasks')} icon={<TasksIcon />} label="Mis Tareas" expanded={isExpanded} active={activePage === 'my-tasks'} />
       </nav>
 
@@ -52,27 +43,12 @@ export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
             <ModeToggle/>
           </div>
           {isExpanded && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80">
-                  <AvatarImage src={session?.user?.image || '/default-avatar.jpg'} alt="Perfil" />
-                  <AvatarFallback>{session?.user?.name?.[0] || 'U'}</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem onClick={() => router.push('/profile/details')} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Cuenta</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => signOut({ callbackUrl: '/' })} 
-                  className="cursor-pointer text-red-600 hover:!text-red-600 hover:!bg-red-50"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="bg-secondary text-primary rounded-lg p-1 hover:bg-red-700 hover:text-white transition-colors"
+            >
+              <LogoutIcon />
+            </Button>
           )}
         </div>
       </nav>
@@ -137,14 +113,6 @@ function ChefIcon() {
     </svg>
   )
 }
-function MenusIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-      <path d="M4 20h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path>
-      <rect x="2" y="9" width="20" height="12" rx="2" ry="2"></rect>
-    </svg>
-  )
-}
 function TasksIcon() {
   return (
     <svg 
@@ -174,4 +142,14 @@ function RecipesIcon() {
   )
 }   
 // Mantener los demás iconos existentes...
+
+function LogoutIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+      <polyline points="16 17 21 12 16 7"></polyline>
+      <line x1="21" y1="12" x2="9" y2="12"></line>
+    </svg>
+  )
+}
 

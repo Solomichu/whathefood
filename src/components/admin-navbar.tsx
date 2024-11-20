@@ -41,7 +41,6 @@ export default function AdminNavbar({ onNavClick, activePage }: AdminNavbarProps
         <NavButton onClick={() => handleNavClick('dashboard')} icon={<HomeIcon />} label="Dashboard" expanded={isExpanded} active={activePage === 'dashboard'} />
         <NavButton onClick={() => handleNavClick('users')} icon={<UsersIcon />} label="Usuarios" expanded={isExpanded} active={activePage === 'users'} />
         <NavButton onClick={() => handleNavClick('recipes')} icon={<RecipesIcon />} label="Recetas" expanded={isExpanded} active={activePage === 'recipes'} />
-        <NavButton onClick={() => handleNavClick('menus')} icon={<MenusIcon />} label="Menús" expanded={isExpanded} active={activePage === 'menus'} />
         <NavButton onClick={() => handleNavClick('tasks')} icon={<TasksIcon />} label="Tareas" expanded={isExpanded} active={activePage === 'tasks'} />
       </nav>
       <nav className="flex flex-col items-center gap-4 px-2 py-5 w-full">
@@ -141,18 +140,6 @@ function RecipesIcon() {
       <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path>
       <path d="M9 18h6"></path>
       <path d="M12 22v-4"></path>
-    </svg>
-  )
-}
-function MenusIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-      <line x1="8" y1="6" x2="21" y2="6"></line>
-      <line x1="8" y1="12" x2="21" y2="12"></line>
-      <line x1="8" y1="18" x2="21" y2="18"></line>
-      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-      <line x1="3" y1="18" x2="3.01" y2="18"></line>
     </svg>
   )
 }

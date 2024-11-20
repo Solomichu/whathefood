@@ -49,10 +49,10 @@ export default function Default() {
 
   useEffect(() => {
     const fetchFavourites = async () => {
-      if (!session) return;
+      if (!session?.user?.id) return;
 
       try {
-        const response = await fetch(`/api/dishes?userId=${session.user.id}`);
+        const response = await fetch(`/api/dishes/favorites?userId=${session.user.id}`);
         if (!response.ok) throw new Error('Error al obtener los platos favoritos');
         const data = await response.json();
         setFavouriteDishes(data.dishes.map((dish: Dish) => dish.id));
@@ -62,7 +62,7 @@ export default function Default() {
     };
 
     fetchFavourites();
-  }, [session]);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     const filtered = dishes.filter(dish => {
@@ -82,7 +82,7 @@ export default function Default() {
   }, [searchParams]);
 
   const handleAddToFavorites = async (dishId: string) => {
-    if (!session) {
+    if (!session?.user?.id) {
       alert('Debes iniciar sesión para agregar platos a favoritos.');
       return;
     }
@@ -90,14 +90,14 @@ export default function Default() {
     const action = favouriteDishes.includes(dishId) ? 'remove' : 'add';
 
     try {
-      const response = await fetch(`/api/dishes`, {
+      const response = await fetch('/api/dishes/favorites', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          dishId: dishId,
           userId: session.user.id,
+          dishId: dishId,
           action: action,
         }),
       });
@@ -106,9 +106,11 @@ export default function Default() {
         throw new Error('Error al modificar favoritos');
       }
 
-      const message = action === 'add' ? 'Plato agregado a favoritos' : 'Plato eliminado de favoritos';
-      alert(message);
-      setFavouriteDishes(prev => action === 'add' ? [...prev, dishId] : prev.filter(id => id !== dishId));
+      setFavouriteDishes(prev => 
+        action === 'add' 
+          ? [...prev, dishId] 
+          : prev.filter(id => id !== dishId)
+      );
     } catch (error) {
       console.error('Error:', error);
       alert('No se pudo modificar el plato en favoritos');
