@@ -5,33 +5,24 @@ import React, { ReactNode, useState } from 'react'
 import Usertable from '@/components/admindash_usertable'
 import AdmindashDishtableV2 from '@/components/admindash_dishtableV2'
 import AdmindashTasktable from '@/components/admindash_tasktable'
-import DashboardDefault from '@/components/admindash-default' 
+import DashboardDefault from '@/components/admindash-default'
+import MyRecipes from '@/app/dashboard/my-recipes'
+import Favourites from '@/app/dashboard/favourites'
 
 export default function Page({ children }: { children: ReactNode }) {
   const [activeNavItem, setActiveNavItem] = useState('dashboard');
-
-  const handleViewChange = (view: string) => {
-    switch (view) {
-      case 'recipes':
-        setCurrentPage(<AdmindashDishtableV2 />)
-        setActiveNavItem('recipes')
-        break
-      case 'users':
-        setCurrentPage(<Usertable />)
-        setActiveNavItem('users')
-        break
-      default:
-        setCurrentPage(<DashboardDefault onViewChange={handleViewChange} />)
-        setActiveNavItem('dashboard')
-    }
-  }
-
   const [currentPage, setCurrentPage] = useState<ReactNode>(
     <DashboardDefault onViewChange={handleViewChange} />
   )
 
+  function handleViewChange(view: string) {
+    handleNavClick(view);
+  }
+
   const handleNavClick = (page: string) => {
     setActiveNavItem(page);
+    document.body.style.removeProperty('pointer-events');
+    
     switch (page) {
       case 'dashboard':
         setCurrentPage(<DashboardDefault onViewChange={handleViewChange} />)
@@ -44,6 +35,12 @@ export default function Page({ children }: { children: ReactNode }) {
         break
       case 'tasks':
         setCurrentPage(<AdmindashTasktable />)
+        break
+      case 'my-recipes':
+        setCurrentPage(<MyRecipes />)
+        break
+      case 'favourites':
+        setCurrentPage(<Favourites />)
         break
       default:
         setCurrentPage(<DashboardDefault onViewChange={handleViewChange} />)

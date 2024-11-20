@@ -38,6 +38,33 @@ export default function FAQPage() {
     }
   ];
 
+  const devFaqs = [
+    {
+      question: "¿Qué tecnologías se utilizaron para desarrollar WHATHEFOOD?",
+      answer: "WHATHEFOOD está construido con Next.js 14 (App Router), TypeScript, Tailwind CSS para los estilos, y Shadcn/ui para los componentes. Utilizamos Supabase como backend para la autenticación y base de datos."
+    },
+    {
+      question: "¿Por qué eligieron Next.js para este proyecto?",
+      answer: "Next.js fue elegido por su excelente rendimiento, capacidades de SSR/SSG, y el nuevo App Router que facilita la creación de layouts y páginas dinámicas. Además, su integración con TypeScript y su gran ecosistema lo hacen ideal para aplicaciones web modernas."
+    },
+    {
+      question: "¿Cómo manejan el estado global en la aplicación?",
+      answer: "Utilizamos una combinación de React Context para estado global ligero y Zustand para estado más complejo. Esto nos permite mantener un código limpio y eficiente sin la complejidad adicional de soluciones más pesadas."
+    },
+    {
+      question: "¿Qué estrategia de deployment utilizan?",
+      answer: "La aplicación está desplegada en Vercel, que ofrece una integración perfecta con Next.js. Utilizamos su sistema de preview deployments para cada PR y CI/CD automatizado."
+    },
+    {
+      question: "¿Cómo manejan la optimización de imágenes?",
+      answer: "Utilizamos el componente Image de Next.js que proporciona optimización automática de imágenes, lazy loading y redimensionamiento según el dispositivo. También implementamos blur placeholder para mejorar la experiencia de usuario."
+    },
+    {
+      question: "¿Qué herramientas de testing utilizan?",
+      answer: "Implementamos Jest para unit testing, React Testing Library para component testing, y Cypress para E2E testing. También utilizamos Playwright para testing de integración."
+    }
+  ];
+
   return (
     <main className="min-h-screen">
       <MainNavbar />
@@ -64,24 +91,51 @@ export default function FAQPage() {
 
       {/* FAQ Section */}
       <section className="py-20 bg-secondary">
-        h2
-        <div className="container mx-auto px-8 max-w-3xl">
-          <div className="bg-card rounded-lg p-6 shadow-lg">
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
-                    <div className="flex items-center gap-3">
-                      <HelpCircle className="h-5 w-5 text-primary" />
-                      {faq.question}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-600">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+        <div className="container mx-auto px-8 max-w-4xl">
+          <div className="bg-card rounded-lg p-8 shadow-lg space-y-12">
+            {/* App FAQs */}
+            <div>
+              <h3 className="text-3xl font-bold text-center mb-8">
+                Preguntas Frecuentes sobre la App
+              </h3>
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={`app-${index}`} value={`app-${index}`}>
+                    <AccordionTrigger className="text-left">
+                      <div className="flex items-center gap-3">
+                        <HelpCircle className="h-5 w-5 text-primary" />
+                        {faq.question}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-gray-600 text-base">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Dev FAQs */}
+            <div>
+              <h3 className="text-3xl font-bold text-center mb-8">
+                Preguntas Frecuentes sobre el Desarrollo
+              </h3>
+              <Accordion type="single" collapsible className="w-full">
+                {devFaqs.map((faq, index) => (
+                  <AccordionItem key={`dev-${index}`} value={`dev-${index}`}>
+                    <AccordionTrigger className="text-left">
+                      <div className="flex items-center gap-3">
+                        <HelpCircle className="h-5 w-5 text-primary" />
+                        {faq.question}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-gray-600 text-base">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
           </div>
         </div>
       </section>

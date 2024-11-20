@@ -21,7 +21,7 @@ export default function AdminNavbar({ onNavClick, activePage }: AdminNavbarProps
   const handleSignOut = async () => {
     try {
       await signOut({ redirect: false })
-      router.push('/') // Redirige a la página principal
+      router.push('/')
     } catch (error) {
       console.error('Error durante el logout:', error)
     }
@@ -29,20 +29,40 @@ export default function AdminNavbar({ onNavClick, activePage }: AdminNavbarProps
 
   return (
     <aside 
-    className={`inset-y-0 left-0 z-10 flex-col border-r border-primary hidden sm:flex justify-between h-[100vh] bg-primary transition-all duration-300 ${isExpanded ? 'w-48' : 'w-14'}`}
-    onMouseEnter={() => setIsExpanded(true)}
+      className={`inset-y-0 left-0 z-10 flex-col border-r border-primary hidden sm:flex justify-between h-[100vh] bg-primary transition-all duration-300 ${isExpanded ? 'w-48' : 'w-14'}`}
+      onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
       <Link href="/" className={`flex w-full justify-center mt-5 py-5 transition-transform duration-300 ${isExpanded ? '-rotate-90' : ''}`}>          
           <h1 className="[writing-mode:vertical-lr] text-secondary text-xl font-bold">WHATHEFOOD+</h1>
       </Link>
+
       <nav className="flex flex-col justify-center items-center gap-8 py-5 px-2">
-        
-        <NavButton onClick={() => handleNavClick('dashboard')} icon={<HomeIcon />} label="Dashboard" expanded={isExpanded} active={activePage === 'dashboard'} />
-        <NavButton onClick={() => handleNavClick('users')} icon={<UsersIcon />} label="Usuarios" expanded={isExpanded} active={activePage === 'users'} />
-        <NavButton onClick={() => handleNavClick('recipes')} icon={<RecipesIcon />} label="Recetas" expanded={isExpanded} active={activePage === 'recipes'} />
-        <NavButton onClick={() => handleNavClick('tasks')} icon={<TasksIcon />} label="Tareas" expanded={isExpanded} active={activePage === 'tasks'} />
+        {/* Sección de Administrador */}
+        <div className="w-full">
+          {isExpanded && (
+            <h2 className="text-secondary/70 text-xs uppercase mb-2 px-3">Administrador</h2>
+          )}
+          <div className="flex flex-col gap-2">
+            <NavButton onClick={() => handleNavClick('dashboard')} icon={<HomeIcon />} label="Dashboard" expanded={isExpanded} active={activePage === 'dashboard'} />
+            <NavButton onClick={() => handleNavClick('users')} icon={<UsersIcon />} label="Panel de usuarios" expanded={isExpanded} active={activePage === 'users'} />
+            <NavButton onClick={() => handleNavClick('recipes')} icon={<RecipesIcon />} label="Recetas" expanded={isExpanded} active={activePage === 'recipes'} />
+          </div>
+        </div>
+
+        {/* Sección Personal */}
+        <div className="w-full">
+          {isExpanded && (
+            <h2 className="text-secondary/70 text-xs uppercase mb-2 px-3">Personal</h2>
+          )}
+          <div className="flex flex-col gap-2">
+            <NavButton onClick={() => handleNavClick('my-recipes')} icon={<MyRecipesIcon />} label="Mis Recetas" expanded={isExpanded} active={activePage === 'my-recipes'} />
+            <NavButton onClick={() => handleNavClick('favourites')} icon={<HeartIcon />} label="Favoritos" expanded={isExpanded} active={activePage === 'favourites'} />
+            <NavButton onClick={() => handleNavClick('tasks')} icon={<TasksIcon />} label="Tareas" expanded={isExpanded} active={activePage === 'tasks'} />
+          </div>
+        </div>
       </nav>
+
       <nav className="flex flex-col items-center gap-4 px-2 py-5 w-full">
         <div className="flex items-center gap-2">
           <div className="bg-secondary rounded-lg p-1 justify-between">
@@ -152,5 +172,27 @@ function TasksIcon() {
     </svg>
   )
 }
+
+// Agregar nuevos iconos
+function MyRecipesIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+      <polyline points="14 2 14 8 20 8"></polyline>
+      <line x1="16" y1="13" x2="8" y2="13"></line>
+      <line x1="16" y1="17" x2="8" y2="17"></line>
+      <line x1="10" y1="9" x2="8" y2="9"></line>
+    </svg>
+  )
+}
+
+function HeartIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+  )
+}
+
 // Definir los demás iconos de manera similar...
 
