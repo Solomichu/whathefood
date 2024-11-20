@@ -109,7 +109,7 @@ export default function UserTable() {
                 const data = await response.json();
                 alert(data.message);
                 fetchUsers();
-                setIsDialogOpen(false);
+                handleCloseDialog();
             } else {
                 const errorData = await response.json();
                 alert(`Error al actualizar el usuario: ${errorData.error}`);
@@ -121,17 +121,30 @@ export default function UserTable() {
     };
 
     const handleDelete = async () => {
-        if (selectedUser) {
+        if (!selectedUser) return;
+
+        try {
             const response = await fetch(`/api/users?id=${selectedUser.id}`, {
                 method: 'DELETE',
             });
 
-            if (response.ok) {
-                fetchUsers();
-                setIsDialogOpen(false); // Cerrar el diálogo después de eliminar
-            } else {
-                console.error('Error al eliminar el usuario');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al eliminar el usuario');
             }
+
+            // Actualizar la lista de usuarios
+            setUsers(prevUsers => prevUsers.filter(user => user.id !== selectedUser.id));
+            
+            // Cerrar el diálogo y limpiar el estado
+            handleCloseDialog();
+            setSelectedUser(null);
+            
+            // Opcional: Mostrar mensaje de éxito
+            alert('Usuario eliminado exitosamente');
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error instanceof Error ? error.message : 'Error al eliminar el usuario');
         }
     };
 
@@ -186,7 +199,7 @@ export default function UserTable() {
             });
             if (response.ok) {
                 fetchUsers(); // Actualizar la lista de usuarios
-                setIsDialogOpen(false);
+                handleCloseDialog();
             } else {
                 const errorData = await response.json();
                 alert(`Error al crear el usuario: ${errorData.error}`);
@@ -213,6 +226,13 @@ export default function UserTable() {
         if (e.target.files && e.target.files[0]) {
             setFormData(prev => ({ ...prev, image: e.target.files![0] }));
         }
+    };
+
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setTimeout(() => {
+            document.body.style.removeProperty('pointer-events');
+        }, 100);
     };
 
     return (
@@ -310,7 +330,16 @@ export default function UserTable() {
                 </table>
             </div>
 
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog 
+                open={isDialogOpen} 
+                onOpenChange={(open) => {
+                    if (!open) {
+                        handleCloseDialog();
+                    } else {
+                        setIsDialogOpen(true);
+                    }
+                }}
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>

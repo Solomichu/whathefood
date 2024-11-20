@@ -226,7 +226,7 @@ export default function HomePage() {
             Únete a nuestra comunidad y comparte tus creaciones culinarias con el mundo
           </p>
           <Button size="lg" className="bg-primary hover:bg-primary/90 text-secondary px-8">
-            Empezar Ahora
+            <Link href="/login">Empezar Ahora</Link>
           </Button>
         </div>
       </section>

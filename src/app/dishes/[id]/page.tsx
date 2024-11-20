@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import MainNavbar from '@/components/main_navbar';
 
 interface Dish {
   id: string;
@@ -14,19 +15,9 @@ interface Dish {
   prepTime: string | null;
   status: string;
   image: string | null;
-  createdBy: {
-    id: string;
-    username: string | null;
-    image: string | null;
-  };
-  likedBy: {
-    id: string;
-    username: string | null;
-  }[];
-  savedBy: {
-    id: string;
-    username: string | null;
-  }[];
+  creatorUsername: string;
+  creatorImage: string;
+  createdById: string;
 }
 
 export default function DishPage() {
@@ -40,8 +31,12 @@ export default function DishPage() {
         const response = await fetch(`/api/dishes?id=${id}`);
         if (response.ok) {
           const dishData = await response.json();
-          setDish(dishData);
-          fetchRelatedDishes(dishData.createdBy.id);
+          setDish({
+            ...dishData,
+            creatorUsername: dishData.creatorUsername || 'Usuario desconocido',
+            creatorImage: dishData.creatorImage || '/placeholder.jpg'
+          });
+          fetchRelatedDishes();
         } else {
           console.error('Error al obtener los datos del plato');
         }
@@ -50,12 +45,28 @@ export default function DishPage() {
       }
     };
 
-    const fetchRelatedDishes = async (userId: string) => {
+    const fetchRelatedDishes = async () => {
       try {
-        const response = await fetch(`/api/dishes?userId=${userId}&limit=4`);
+        const response = await fetch(`/api/dishes?status=APPROVED`);
         if (response.ok) {
           const data = await response.json();
-          setRelatedDishes(data.dishes.filter((d: Dish) => d.id !== id));
+          const availableDishes = data.dishes.filter((d: Dish) => 
+            d.id !== id && d.status === 'APPROVED'
+          );
+          
+          const randomDishes = [];
+          const maxDishes = Math.min(3, availableDishes.length);
+          
+          while (randomDishes.length < maxDishes) {
+            const randomIndex = Math.floor(Math.random() * availableDishes.length);
+            const randomDish = availableDishes[randomIndex];
+            
+            if (!randomDishes.some(dish => dish.id === randomDish.id)) {
+              randomDishes.push(randomDish);
+            }
+          }
+          
+          setRelatedDishes(randomDishes);
         } else {
           console.error('Error al obtener platos relacionados');
         }
@@ -75,6 +86,7 @@ export default function DishPage() {
 
   return (
     <main className="flex flex-col min-h-screen  bg-gray-100">
+      <MainNavbar />
       <div className="w-full h-64 bg-cover bg-center" style={{backgroundImage: `url(${dish.image || '/placeholder.jpg'})`}}></div>
       <div className="container mx-auto px-4 h-m">
         <div className="bg-white rounded-lg shadow-lg -mt-16 p-6 mb-8 max-w-4xl mx-auto">
@@ -85,10 +97,10 @@ export default function DishPage() {
             </div>
             <div className="flex items-center space-x-2">
               <Avatar>
-                <AvatarImage src={dish.createdBy.image || undefined} alt={dish.createdBy.username || 'Usuario'} />
-                <AvatarFallback>{(dish.createdBy.username || 'U').charAt(0)}</AvatarFallback>
+                <AvatarImage src={dish.creatorImage} alt={dish.creatorUsername} />
+                <AvatarFallback>{(dish.creatorUsername || 'U').charAt(0)}</AvatarFallback>
               </Avatar>
-              <span>{dish?.createdBy?.username || 'Usuario desconocido'}</span>
+              <span>{dish.creatorUsername}</span>
             </div>
           </div>
           <h2 className="text-xl font-semibold mb-2">Descripción</h2>
@@ -115,19 +127,18 @@ export default function DishPage() {
                     <div className="flex justify-between items-center">
                       <Button variant="default" size="sm">Ver plato</Button>
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm">
-                          {relatedDish.createdBy?.username || 'Usuario desconocido'}
-                        </span>
                         <Avatar className="w-6 h-6">
                           <AvatarImage 
-                            src={relatedDish.createdBy?.image || undefined} 
-                            alt={relatedDish.createdBy?.username || 'Usuario'} 
+                            src={relatedDish.creatorImage} 
+                            alt={relatedDish.creatorUsername} 
                           />
                           <AvatarFallback>
-                            {relatedDish.createdBy?.username?.[0] || 'U'}
+                            {(relatedDish.creatorUsername || 'U').charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        
+                        <span className="text-sm">
+                          {relatedDish.creatorUsername}
+                        </span>
                       </div>
                     </div>
                   </div>

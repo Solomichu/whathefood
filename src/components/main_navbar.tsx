@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,10 +12,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut } from "lucide-react"; // Importar iconos
 import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 export default function UserNavbar() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 0;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogin = () => {
     router.push('/login');
@@ -26,7 +38,10 @@ export default function UserNavbar() {
   };
 
   return (
-    <nav className="fixed w-full top-0 z-50">
+    <nav className={cn(
+      "fixed w-full top-0 z-50 transition-colors duration-200",
+      scrolled ? "bg-primary" : "bg-transparent"
+    )}>
       <div className="mx-auto w-[80%] flex items-center justify-between py-4">
         {/* Logo - 1/3 */}
         <div className="w-1/3">

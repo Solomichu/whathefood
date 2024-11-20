@@ -119,11 +119,18 @@ export default function CreatDishModal({
               </label>
               <Input id="name" name="name" value={formData.name} onChange={handleChange} className="col-span-3" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-start gap-4">
               <label htmlFor="instructions" className="text-right">
                 Instrucciones
               </label>
-              <Textarea id="instructions" name="instructions" value={formData.instructions} onChange={handleChange} className="col-span-3" />
+              <Textarea
+                id="instructions"
+                name="instructions"
+                value={formData.instructions}
+                onChange={handleChange}
+                className="col-span-3 min-h-[100px] max-h-[200px] resize-none overflow-y-auto"
+                placeholder="Escribe las instrucciones del plato..."
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="prepTime" className="text-right">
@@ -175,30 +182,39 @@ export default function CreatDishModal({
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="text-lg font-semibold">{formData.name || 'Nombre del plato'}</h3>
-                  <p className="text-sm text-gray-500 truncate">{formData.instructions || 'Instrucciones del plato'}</p>
+              <div className="flex flex-col h-full">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold truncate">{formData.name || 'Nombre del plato'}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 overflow-hidden">
+                      {formData.instructions || 'Instrucciones del plato'}
+                    </p>
+                  </div>
+                  <Badge variant="secondary" className="ml-2 shrink-0">
+                    {formData.prepTime || '0'}′
+                  </Badge>
                 </div>
-                <Badge variant="secondary">{formData.prepTime || '0'}'</Badge>
-              </div>
-              <div className="flex justify-between items-center mt-4">
-                <Badge variant="outline" className={
-                  formData.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                  formData.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }>
-                  {formData.status}
-                </Badge>
-                <div className="flex items-center space-x-2">
-                  <Avatar>
-                    {userImage ? (
-                      <Image src={userImage} alt={username} layout="fill" />
-                    ) : (
-                      <AvatarFallback>{username[0]}</AvatarFallback>
-                    )}
-                  </Avatar>
-                  <span className="text-sm">{session?.user?.name}</span>
+                <div className="flex justify-between items-center mt-auto">
+                  <Badge 
+                    variant="outline" 
+                    className={
+                      formData.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                      formData.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }
+                  >
+                    {formData.status}
+                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Avatar>
+                      {userImage ? (
+                        <Image src={userImage} alt={username} layout="fill" />
+                      ) : (
+                        <AvatarFallback>{username?.[0]}</AvatarFallback>
+                      )}
+                    </Avatar>
+                    <span className="text-sm truncate max-w-[100px]">{session?.user?.name}</span>
+                  </div>
                 </div>
               </div>
             </CardContent>

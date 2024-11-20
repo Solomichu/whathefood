@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Eye, Edit, Trash2, Search } from "lucide-react"
+import { MoreVertical, Eye, Edit, Trash2, Search, Heart } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +71,7 @@ export default function AdmindashDishtableV2() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [favouriteDishes, setFavouriteDishes] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchDishes = async () => {
@@ -90,9 +91,26 @@ export default function AdmindashDishtableV2() {
   }, []);
 
   useEffect(() => {
+    const fetchFavourites = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        const response = await fetch(`/api/dishes/favorites?userId=${session.user.id}`);
+        if (!response.ok) throw new Error('Error al obtener los platos favoritos');
+        const data = await response.json();
+        setFavouriteDishes(data.dishes.map((dish: Dish) => dish.id));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchFavourites();
+  }, [session?.user?.id]);
+
+  useEffect(() => {
     const filtered = dishes.filter(dish => {
       const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         dish.name?.toLowerCase().includes(searchLower) ||
         dish.id?.toLowerCase().includes(searchLower) ||
         dish.instructions?.toLowerCase().includes(searchLower) ||
@@ -125,12 +143,12 @@ export default function AdmindashDishtableV2() {
       const response = await fetch(`/api/dishes?id=${id}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         setDishes(prevDishes => prevDishes.filter(dish => dish.id !== id));
         setIsDeleteDialogOpen(false);
         setDeletingDish(null);
-        
+
         // Configurar información para el drawer
         setDeletedDishInfo({
           name: dishToDelete.name,
@@ -181,42 +199,42 @@ export default function AdmindashDishtableV2() {
 
   const handleDishCreated = async (newDish: Dish) => {
     try {
-        // Asegurarse de que el nuevo plato tiene todos los campos necesarios
-        const completeDish: Dish = {
-            ...newDish,
-            creatorUsername: newDish.creatorUsername || session?.user?.name || 'Usuario desconocido',
-            creatorImage: newDish.creatorImage || session?.user?.image || '/ruta/a/imagen/por/defecto.jpg',
-            createdById: newDish.createdById || session?.user?.id,
-        };
+      // Asegurarse de que el nuevo plato tiene todos los campos necesarios
+      const completeDish: Dish = {
+        ...newDish,
+        creatorUsername: newDish.creatorUsername || session?.user?.name || 'Usuario desconocido',
+        creatorImage: newDish.creatorImage || session?.user?.image || '/ruta/a/imagen/por/defecto.jpg',
+        createdById: newDish.createdById || session?.user?.id,
+      };
 
-        // Actualizar el estado con el plato completo
-        setDishes(prevDishes => [...prevDishes, completeDish]);
-        handleCloseCreateModal();
-        
-        // Configurar información para el drawer
-        setCreatedDishInfo({
-            name: completeDish.name,
-            creatorUsername: completeDish.creatorUsername,
-            status: completeDish.status
-        });
-        setIsCreateDrawerOpen(true);
+      // Actualizar el estado con el plato completo
+      setDishes(prevDishes => [...prevDishes, completeDish]);
+      handleCloseCreateModal();
 
-        // Actualizar la lista completa de platos
-        const response = await fetch('/api/dishes');
-        if (response.ok) {
-            const data = await response.json();
-            setDishes(data.dishes);
-        }
+      // Configurar información para el drawer
+      setCreatedDishInfo({
+        name: completeDish.name,
+        creatorUsername: completeDish.creatorUsername,
+        status: completeDish.status
+      });
+      setIsCreateDrawerOpen(true);
 
-        // Cerrar el drawer después de 3 segundos
-        setTimeout(() => {
-            setIsCreateDrawerOpen(false);
-            setCreatedDishInfo(null);
-        }, 3000);
+      // Actualizar la lista completa de platos
+      const response = await fetch('/api/dishes');
+      if (response.ok) {
+        const data = await response.json();
+        setDishes(data.dishes);
+      }
+
+      // Cerrar el drawer después de 3 segundos
+      setTimeout(() => {
+        setIsCreateDrawerOpen(false);
+        setCreatedDishInfo(null);
+      }, 3000);
     } catch (error) {
-        console.error('Error al manejar el plato creado:', error);
+      console.error('Error al manejar el plato creado:', error);
     }
-};
+  };
 
   const handleApprove = async (id: string) => {
     try {
@@ -228,7 +246,7 @@ export default function AdmindashDishtableV2() {
       formData.append('instructions', currentDish.instructions || '');
       formData.append('prepTime', currentDish.prepTime || '');
       formData.append('status', 'APPROVED');
-      
+
       if (currentDish.createdById) {
         formData.append('createdById', currentDish.createdById);
       }
@@ -244,15 +262,15 @@ export default function AdmindashDishtableV2() {
       }
 
       const updatedDish = await response.json();
-      
-      setDishes(prevDishes => prevDishes.map(dish => 
+
+      setDishes(prevDishes => prevDishes.map(dish =>
         dish.id === id ? {
           ...updatedDish,
           creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
           creatorImage: updatedDish.creatorImage || '/ruta/a/imagen/por/defecto.jpg',
         } : dish
       ));
-      
+
       setApprovedDishInfo({
         name: updatedDish.name,
         creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
@@ -281,7 +299,7 @@ export default function AdmindashDishtableV2() {
       formData.append('instructions', currentDish.instructions || '');
       formData.append('prepTime', currentDish.prepTime || '');
       formData.append('status', 'REJECTED');
-      
+
       if (currentDish.createdById) {
         formData.append('createdById', currentDish.createdById);
       }
@@ -297,18 +315,54 @@ export default function AdmindashDishtableV2() {
       }
 
       const updatedDish = await response.json();
-      
-      setDishes(prevDishes => prevDishes.map(dish => 
+
+      setDishes(prevDishes => prevDishes.map(dish =>
         dish.id === id ? {
           ...updatedDish,
           creatorUsername: updatedDish.creatorUsername || 'Usuario desconocido',
           creatorImage: updatedDish.creatorImage || '/ruta/a/imagen/por/defecto.jpg',
         } : dish
       ));
-      
+
     } catch (error) {
       console.error('Error:', error);
       alert(error instanceof Error ? error.message : 'Error al rechazar el plato');
+    }
+  };
+
+  const handleAddToFavorites = async (dishId: string) => {
+    if (!session?.user?.id) {
+      alert('Debes iniciar sesión para agregar platos a favoritos.');
+      return;
+    }
+
+    const action = favouriteDishes.includes(dishId) ? 'remove' : 'add';
+
+    try {
+      const response = await fetch('/api/dishes/favorites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          dishId: dishId,
+          action: action,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al modificar favoritos');
+      }
+
+      setFavouriteDishes(prev =>
+        action === 'add'
+          ? [...prev, dishId]
+          : prev.filter(id => id !== dishId)
+      );
+    } catch (error) {
+      console.error('Error:', error);
+      alert('No se pudo modificar el plato en favoritos');
     }
   };
 
@@ -319,7 +373,7 @@ export default function AdmindashDishtableV2() {
         <Button onClick={handleOpenCreateModal}>Crear Plato</Button>
       </div>
       <Separator className="mb-4" />
-      
+
       <div className="flex gap-4 mb-6">
         <div className="relative flex-1">
           <input
@@ -365,7 +419,7 @@ export default function AdmindashDishtableV2() {
             </CardHeader>
             <CardContent className="p-4 flex-1">
               <div className="flex flex-col h-full">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-2 items-center">
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-lg font-semibold truncate">{dish.name}</CardTitle>
                     <p className="text-sm text-gray-500 line-clamp-2">{dish.instructions}</p>
@@ -373,14 +427,25 @@ export default function AdmindashDishtableV2() {
                   <Badge variant="secondary" className="ml-2 whitespace-nowrap">
                     {dish.prepTime}'
                   </Badge>
+                  <Button
+                    variant={favouriteDishes.includes(dish.id) ? "filled" : "ghost"}
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleAddToFavorites(dish.id);
+                    }}
+                  >
+                    <Heart className={`h-4 w-4 ${favouriteDishes.includes(dish.id) ? 'text-red-500' : ''}`} />
+                  </Button>
                 </div>
-                
+
                 <div className="mt-auto">
                   <div className="flex justify-between items-center mt-4">
                     <Badge variant="outline" className={
                       dish.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                      dish.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                        dish.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
                     }>
                       {dish.status}
                     </Badge>
@@ -442,18 +507,18 @@ export default function AdmindashDishtableV2() {
                       </DropdownMenu>
                     </div>
                   </div>
-                  
+
                   {dish.status === 'PENDING' && (
                     <div className="mt-4 space-y-2">
                       <p className="text-sm text-gray-600">Este plato está pendiente de revisión</p>
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           onClick={() => handleApprove(dish.id)}
                           className="bg-green-500 hover:bg-green-600 text-white flex-1"
                         >
                           Aceptar
                         </Button>
-                        <Button 
+                        <Button
                           onClick={() => handleReject(dish.id)}
                           variant="destructive"
                           className="bg-red-500 hover:bg-red-600 text-white flex-1"
@@ -490,9 +555,9 @@ export default function AdmindashDishtableV2() {
       </Drawer>
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="sm:max-w-[900px] !h-fit">
-          <CreatDishModal 
-            onDishCreated={handleDishCreated} 
-            userImage={session?.user?.image} 
+          <CreatDishModal
+            onDishCreated={handleDishCreated}
+            userImage={session?.user?.image}
             username={session?.user?.name}
             userId={session?.user?.id}
             statusOptions={['PENDING', 'APPROVED', 'REJECTED']}
@@ -519,8 +584,8 @@ export default function AdmindashDishtableV2() {
           </DrawerHeader>
         </DrawerContent>
       </Drawer>
-      <Drawer 
-        open={isDeleteDrawerOpen} 
+      <Drawer
+        open={isDeleteDrawerOpen}
         onOpenChange={(open) => {
           setIsDeleteDrawerOpen(open);
           // Asegurarse de que pointer-events se elimine al cerrar el drawer
@@ -559,8 +624,8 @@ export default function AdmindashDishtableV2() {
               <div className="flex items-center justify-center gap-2">
                 <Badge variant="outline" className={
                   createdDishInfo?.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                  createdDishInfo?.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
+                    createdDishInfo?.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
                 }>
                   {createdDishInfo?.status}
                 </Badge>

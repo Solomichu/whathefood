@@ -98,10 +98,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
             ¡Bienvenido, {session?.user?.name || 'Administrador'}!
           </h1>
           <p className="text-muted-foreground">
-            Panel de administración de TuCocina
-          </p>
-          <p className="text-muted-foreground">
-            Tienes {userTasksCount} tareas
+            al panel de administración de WHATHEFOOD
           </p>
         </div>
       </div>

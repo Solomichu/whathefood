@@ -180,6 +180,7 @@ export async function DELETE(request: Request) {
     }
 
     try {
+        // Primero buscar el usuario y su imagen
         const user = await prisma.user.findUnique({
             where: { id },
             select: { image: true }
@@ -189,18 +190,26 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
         }
 
+        // Si existe una imagen, eliminarla
         if (user.image) {
             await deleteUserImage(user.image);
         }
 
-        /*const deletedUser = await prisma.user.delete({
+        // Eliminar el usuario de la base de datos (descomentar y modificar)
+        const deletedUser = await prisma.user.delete({
             where: { id },
-        });*/
+        });
 
-        return NextResponse.json({ message: 'Usuario eliminado exitosamente' }, { status: 200 });
+        return NextResponse.json({ 
+            message: 'Usuario eliminado exitosamente',
+            user: deletedUser 
+        }, { status: 200 });
     } catch (error) {
         console.error('Error al eliminar el usuario:', error);
-        return NextResponse.json({ error: 'Error al eliminar el usuario' }, { status: 500 });
+        return NextResponse.json({ 
+            error: 'Error al eliminar el usuario',
+            details: error instanceof Error ? error.message : 'Error desconocido'
+        }, { status: 500 });
     }
 }
 
