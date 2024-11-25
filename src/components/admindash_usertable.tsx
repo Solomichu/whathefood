@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { usePointerEvents } from '@/hooks/usePointerEvents';
 
 interface User {
     id: string;
@@ -48,6 +49,8 @@ export default function UserTable() {
     });
     const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    usePointerEvents(isDialogOpen);
 
     useEffect(() => {
         fetchUsers();
@@ -230,9 +233,7 @@ export default function UserTable() {
 
     const handleCloseDialog = () => {
         setIsDialogOpen(false);
-        setTimeout(() => {
-            document.body.style.removeProperty('pointer-events');
-        }, 100);
+        document.body.style.removeProperty('pointer-events');
     };
 
     return (

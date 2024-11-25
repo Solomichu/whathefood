@@ -49,7 +49,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
         tasksResponse.json()
       ]);
 
-      const last7Days = Array.from({length: 7}, (_, i) => {
+      const last7Days = Array.from({length: 14}, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() - i);
         return d.toISOString().split('T')[0];
