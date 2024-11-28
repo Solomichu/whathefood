@@ -249,6 +249,7 @@ export default function HomePage() {
                 <li><Link href="/admin/dashboard">Administración</Link></li>
                 <li><Link href="/about">Sobre nosotros</Link></li>
                 <li><Link href="/faq">FAQ</Link></li>
+                <li><Link href="/privacy-policy">Política de Privacidad</Link></li>
               </ul>
             </div>
             <div>

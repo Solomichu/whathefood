@@ -29,7 +29,7 @@ export default function AdminNavbar({ onNavClick, activePage }: AdminNavbarProps
 
   return (
     <aside 
-      className={`inset-y-0 left-0 z-10 flex-col border-r border-primary hidden sm:flex justify-between h-[100vh] bg-primary transition-all duration-300 ${isExpanded ? 'w-48' : 'w-14'}`}
+      className={`fixed top-0 left-0 z-50 flex-col border-r border-primary hidden sm:flex justify-between h-screen bg-primary transition-all duration-300 ${isExpanded ? 'w-48' : 'w-14'}`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
