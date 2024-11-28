@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { usePointerEvents } from '@/hooks/usePointerEvents'
 
 interface Dish {
   id: string;
@@ -72,6 +73,8 @@ export default function AdmindashDishtableV2() {
   const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [favouriteDishes, setFavouriteDishes] = useState<string[]>([]);
+
+  usePointerEvents(isDeleteDialogOpen);
 
   useEffect(() => {
     const fetchDishes = async () => {
