@@ -6,7 +6,8 @@
 
 
 generator client {
-  provider = "prisma-client-js" // Generador de cliente Prisma para interactuar con la base de datos
+  provider      = "prisma-client-js"
+  binaryTargets = ["windows", "native", "linux-musl"]
 }
 
 
