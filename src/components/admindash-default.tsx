@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -24,9 +24,8 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
     totalTasks: 0,
     userGrowth: []
   });
-  const [userTasksCount, setUserTasksCount] = useState(0);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -60,6 +59,7 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
           month: 'short', 
           day: 'numeric' 
         }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         count: usersData.filter((user: any) => {
           const creationDate = user.creationDate ? new Date(user.creationDate) : null;
           return creationDate && 
@@ -76,18 +76,17 @@ export default function DashboardDefault({ onViewChange }: { onViewChange?: (vie
       });
 
       const userTasksResponse = await fetch(`/api/tasks?userId=${session?.user?.id}`);
-      const userTasksData = await userTasksResponse.json();
-      setUserTasksCount(userTasksData.length);
+      await userTasksResponse.json();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error al obtener estadísticas');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 p-6">

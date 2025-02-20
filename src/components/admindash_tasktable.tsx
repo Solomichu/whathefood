@@ -3,16 +3,16 @@ import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Edit, Trash2, Search, Plus, Check } from "lucide-react"
+import { MoreVertical, Edit, Trash2, Search, Plus } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { DialogContent } from "@/components/ui/dialog"
 import { useSession } from 'next-auth/react'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
+import {DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import CreateTaskModal from './createtask_modal'
 import EditTaskDialog from './edittask_dialog'
 import DeleteTaskDialog from './deletetask_dialog'

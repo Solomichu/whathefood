@@ -40,7 +40,8 @@ export default function NewDish_Page() {
         fetchUsers();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleChange = (e: any) => {
         if (e.target.name === 'image' && e.target instanceof HTMLInputElement) {
             setFormData({ ...formData, image: e.target.files ? e.target.files[0] : null });
         } else {

@@ -119,7 +119,7 @@ export default function Favourites() {
                       <p className="text-sm text-gray-500 line-clamp-2">{dish.instructions}</p>
                     </div>
                     <Badge variant="secondary" className="ml-2 whitespace-nowrap">
-                      {dish.prepTime}'
+                      {dish.prepTime}&apos;
                     </Badge>
                   </div>
                   <div className="mt-auto">

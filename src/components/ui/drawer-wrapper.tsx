@@ -13,7 +13,6 @@ export function DrawerWrapper({
   open,
   onOpenChange,
   children,
-  className
 }: DrawerWrapperProps) {
   usePointerEvents(open)
 
@@ -21,7 +20,6 @@ export function DrawerWrapper({
     <Drawer
       open={open}
       onOpenChange={onOpenChange}
-      className={className}
     >
       {children}
     </Drawer>

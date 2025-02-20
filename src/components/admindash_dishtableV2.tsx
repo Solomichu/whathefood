@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 import { usePointerEvents } from '@/hooks/usePointerEvents'
 
-interface Dish {
+export interface Dish {
   id: string;
   image: string | null;
   name: string;
@@ -46,7 +46,6 @@ export default function AdmindashDishtableV2() {
 
   const router = useRouter();
   const [dishes, setDishes] = useState<Dish[]>([]);
-  const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingDish, setDeletingDish] = useState<Dish | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -129,10 +128,6 @@ export default function AdmindashDishtableV2() {
 
   const handleView = (id: string) => {
     router.push(`/dishes/${id}`);
-  };
-
-  const handleEdit = (dish: Dish) => {
-    setEditingDish(dish);
   };
 
   const handleDelete = async (id: string) => {
@@ -428,10 +423,10 @@ export default function AdmindashDishtableV2() {
                     <p className="text-sm text-gray-500 line-clamp-2">{dish.instructions}</p>
                   </div>
                   <Badge variant="secondary" className="ml-2 whitespace-nowrap">
-                    {dish.prepTime}'
+                    {dish.prepTime} &apos;
                   </Badge>
                   <Button
-                    variant={favouriteDishes.includes(dish.id) ? "filled" : "ghost"}
+                    variant={favouriteDishes.includes(dish.id) ? "default" : "ghost"}
                     size="icon"
                     onClick={(e) => {
                       e.preventDefault();
@@ -560,10 +555,9 @@ export default function AdmindashDishtableV2() {
         <DialogContent className="sm:max-w-[900px] !h-fit">
           <CreatDishModal
             onDishCreated={handleDishCreated}
-            userImage={session?.user?.image}
-            username={session?.user?.name}
+            userImage={session?.user?.image ?? undefined}
+            username={session?.user?.name ?? undefined}
             userId={session?.user?.id}
-            statusOptions={['PENDING', 'APPROVED', 'REJECTED']}
           />
         </DialogContent>
       </Dialog>

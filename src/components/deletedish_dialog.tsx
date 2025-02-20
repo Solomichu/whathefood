@@ -62,7 +62,7 @@ export default function DeleteDishDialog({ dish, onConfirmDelete, onClose }: Del
               <h3 className="text-lg font-semibold">{dish.name}</h3>
               <p className="text-sm text-gray-500 truncate">{dish.instructions}</p>
             </div>
-            <Badge variant="secondary">{dish.prepTime}'</Badge>
+            <Badge variant="secondary">{dish.prepTime} &apos;</Badge>
           </div>
           <div className="flex justify-between items-center mt-4">
             <Badge variant="outline" className={

@@ -208,7 +208,7 @@ export default function CreatDishModal({
                   <div className="flex items-center space-x-2">
                     <Avatar>
                       {userImage ? (
-                        <Image src={userImage} alt={username} layout="fill" />
+                        <Image src={userImage} alt={username ?? ''} layout="fill" />
                       ) : (
                         <AvatarFallback>{username?.[0]}</AvatarFallback>
                       )}

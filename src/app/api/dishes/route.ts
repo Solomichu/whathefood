@@ -218,6 +218,7 @@ export async function PUT(request: Request) {
         const createdById = formData.get('createdById') as string;
         const imageFile = formData.get('image') as File | null;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateData: any = {
             name,
             instructions,
@@ -259,6 +260,7 @@ export async function PUT(request: Request) {
         };
 
         return NextResponse.json(transformedDish);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Error al actualizar el plato:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });

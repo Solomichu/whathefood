@@ -9,7 +9,7 @@ import DashboardDefault from '@/components/admindash-default'
 import MyRecipes from '@/app/dashboard/my-recipes'
 import Favourites from '@/app/dashboard/favourites'
 
-export default function Page({ children }: { children: ReactNode }) {
+export default function Page() {
   const [activeNavItem, setActiveNavItem] = useState('dashboard');
   const [currentPage, setCurrentPage] = useState<ReactNode>(
     <DashboardDefault onViewChange={handleViewChange} />
@@ -51,8 +51,10 @@ export default function Page({ children }: { children: ReactNode }) {
     <main className="flex flex-row bg-secondary">
       <AdminNavbar onNavClick={handleNavClick} activePage={activeNavItem} />
       <main className="w-full p-10 ml-14">
+        <>
         {currentPage}
-        {children}
+        
+        </>
       </main>
     </main>
   )

@@ -25,18 +25,6 @@ interface Dish {
 
 type SortKey = keyof Dish;
 
-const formatDate = (date: Date | string) => {
-  const d = new Date(date);
-  return d.toLocaleString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-};
 
 export default function DishTable() {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -72,6 +60,7 @@ export default function DishTable() {
     const response = await fetch('/api/users');
     if (response.ok) {
       const data = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setUsers(data.map((user: any) => ({ id: user.id, username: user.username })));
     }
   };

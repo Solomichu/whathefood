@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Eye, Edit, Trash2, Router } from "lucide-react"
+import { MoreVertical, Eye, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +53,7 @@ export default function MyRecipes() {
     name: string;
     creatorUsername: string;
   } | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserDishes = async () => {
@@ -77,9 +78,6 @@ export default function MyRecipes() {
     setIsCreateModalOpen(true);
   };
 
-  const handleCloseCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
 
   const handleDishCreated = async (newDish: Dish) => {
     try {
@@ -212,7 +210,7 @@ export default function MyRecipes() {
                       <p className="text-sm text-gray-500 line-clamp-2">{dish.instructions}</p>
                     </div>
                     <Badge variant="secondary" className="ml-2 whitespace-nowrap">
-                      {dish.prepTime}'
+                      {dish.prepTime} &apos;
                     </Badge>
                   </div>
                   <div className="mt-auto">
@@ -241,11 +239,14 @@ export default function MyRecipes() {
                               <Eye className="mr-2 h-4 w-4" />
                               <span>Ver</span>
                             </DropdownMenuItem>
-                            <DialogWrapper>
+                            <DialogWrapper 
+                              open={isEditDialogOpen} 
+                              onOpenChange={setIsEditDialogOpen}
+                            >
                               <DialogContent className="sm:max-w-[900px] !h-fit">
                                 <EditDishDialog
                                   dish={dish}
-                                  onDishUpdated={handleDishCreated} // Cambia esto si es necesario
+                                  onDishUpdated={handleDishCreated}
                                 />
                               </DialogContent>
                             </DialogWrapper>
@@ -272,8 +273,8 @@ export default function MyRecipes() {
         <DialogContent className="sm:max-w-[900px] !h-fit">
           <CreatDishModal 
             onDishCreated={handleDishCreated} 
-            userImage={session?.user?.image} 
-            username={session?.user?.name}
+            userImage={session?.user?.image ?? undefined} 
+            username={session?.user?.name ?? undefined}
             userId={session?.user?.id}
           />
         </DialogContent>
@@ -309,7 +310,7 @@ export default function MyRecipes() {
           <DialogHeader>
             <DialogTitle>Confirmar eliminación</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que quieres eliminar el plato "{dishToDelete?.name}"?
+              ¿Estás seguro de que quieres eliminar el plato &quot;{dishToDelete?.name}&quot;?
               Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>

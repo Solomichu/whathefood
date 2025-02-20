@@ -27,7 +27,6 @@ export default function Default() {
   const { data: session } = useSession()
   const searchParams = useSearchParams()
   const [dishes, setDishes] = useState<Dish[]>([])
-  const [activeTab, setActiveTab] = useState("all")
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDishes, setFilteredDishes] = useState<Dish[]>([]);
   const [favouriteDishes, setFavouriteDishes] = useState<string[]>([]);
@@ -159,7 +158,7 @@ export default function Default() {
                         </p>
                       </div>
                       <Button 
-                        variant={favouriteDishes.includes(dish.id) ? "filled" : "ghost"} 
+                        variant={favouriteDishes.includes(dish.id) ? "default" : "ghost"} 
                         size="icon" 
                         onClick={(e) => { e.preventDefault(); handleAddToFavorites(dish.id); }}
                       >

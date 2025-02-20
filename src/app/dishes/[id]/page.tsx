@@ -1,9 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import MainNavbar from '@/components/main_navbar';
@@ -54,7 +52,8 @@ export default function DishPage() {
             d.id !== id && d.status === 'APPROVED'
           );
           
-          const randomDishes = [];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const randomDishes: any[] | ((prevState: Dish[]) => Dish[]) = [];
           const maxDishes = Math.min(3, availableDishes.length);
           
           while (randomDishes.length < maxDishes) {

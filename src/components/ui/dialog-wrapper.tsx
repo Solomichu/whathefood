@@ -13,7 +13,6 @@ export function DialogWrapper({
   open,
   onOpenChange,
   children,
-  className
 }: DialogWrapperProps) {
   usePointerEvents(open)
 
@@ -21,7 +20,6 @@ export function DialogWrapper({
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      className={className}
     >
       {children}
     </Dialog>

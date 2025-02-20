@@ -1,19 +1,16 @@
 import Link from "next/link";
 import React, { useState } from 'react'
 import { ModeToggle } from './theme-toggle-button'
-import { signOut, useSession } from "next-auth/react"
+import { signOut } from "next-auth/react"
 import { Button } from "./ui/button";
-import { useRouter } from "next/navigation"
 
 interface AdminNavbarProps {
   onNavClick: (page: string) => void
 }
 
 export default function AdminNavbar({ onNavClick }: AdminNavbarProps) {
-  const { data: session } = useSession();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activePage, setActivePage] = useState('recipes');
-  const router = useRouter()
 
   const handleNavClick = (page: string) => {
     setActivePage(page);

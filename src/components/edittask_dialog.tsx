@@ -31,7 +31,6 @@ export default function EditTaskDialog({ task, onTaskUpdated, onClose }: EditTas
   const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description);
   const [priority, setPriority] = useState(task.priority);
-  const [status, setStatus] = useState(task.status);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +40,7 @@ export default function EditTaskDialog({ task, onTaskUpdated, onClose }: EditTas
     formData.append('name', name);
     formData.append('description', description);
     formData.append('priority', priority);
-    formData.append('status', status);
+    formData.append('status', task.status);
     formData.append('createdById', task.createdById);
 
     try {

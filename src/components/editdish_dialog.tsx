@@ -1,27 +1,17 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Image from 'next/image'
-import { Separator } from './ui/separator'
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from './ui/label'
 import { useSession } from "next-auth/react";
+import { Dish } from './admindash_dishtableV2'
 
-interface Dish {
-  id: string;
-  name: string;
-  instructions: string | null;
-  prepTime: string | null;
-  status: string;
-  image: string | null;
-  createdById: string;
-}
 
 interface EditDishDialogProps {
   dish: Dish;
@@ -203,7 +193,9 @@ export default function EditDishDialog({ dish, onDishUpdated, onClose }: EditDis
           </div>
         )}
 
-        <Button onClick={handleSubmit}>Guardar cambios</Button>
+        <form onSubmit={handleSubmit}>
+          <Button type="submit">Guardar cambios</Button>
+        </form>
       </div>
 
       {/* Panel derecho con vista previa */}
