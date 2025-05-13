@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Team {
   id: string;
