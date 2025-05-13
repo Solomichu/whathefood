@@ -1,59 +1,53 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["windows", "native", "linux-musl"]
 }
 
-
 datasource db {
-  provider = "postgresql" // Especifica que se está utilizando PostgreSQL como base de datos
-  //leer url de .env.local, 
-  url = env("DATABASE_URL") // La URL de conexión a la base de datos se obtiene de las variables de entorno
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-
-//Tabla usuario con los campos correspondientes para esta misma 
 model User {
-  //Basic info
-  id                String        @id @default(cuid())                                   
-  username          String?       @unique
-  email             String        @unique 
-  password          String  
-  role              Role          @default(USER)
-  image             String?
-  creationDate      DateTime      @default(now())
-  modificationDate  DateTime      @default(now()) @updatedAt
+  id               String    @id @default(cuid())
+  username         String?   @unique
+  email            String    @unique
+  password         String
+  role             Role      @default(PLAYER)
+  image            String?
+  creationDate     DateTime  @default(now())
+  modificationDate DateTime  @default(now()) @updatedAt
 
-  //Relations
-  createdTasks      Task[]        @relation("UserCreatedTasks")
-  likedDishes       Dish[]        @relation("UserLikedDishes")
-  savedDishes       Dish[]        @relation("UserSavedDishes")
-  createdDishes     Dish[]        @relation("UserCreatedDishes")
+  // Player specific fields
+  position         String?
+  age             Int?
+  nationality     String?
+  currentTeam     Team?     @relation("TeamPlayers", fields: [teamId], references: [id])
+  teamId          String?
+  
+  // Team specific fields
+  managedTeam     Team?     @relation("TeamManager")
+  
+  // Common relations
+  createdTasks    Task[]    @relation("UserCreatedTasks")
 }
 
-model Dish {
-  //Basic info
-  id                   String        @id @default(cuid())
-  image                String?
-  name                 String
-  instructions         String?
-  prepTime             String?
-  status               Status        @default(PENDING)
-  createdBy            User?         @relation("UserCreatedDishes", fields: [createdById], references: [id])
-  createdById          String?       
-  likedBy              User[]        @relation("UserLikedDishes")
-  savedBy              User[]        @relation("UserSavedDishes")
-  types                DishType[]    @relation("DishTypes")
+model Team {
+  id              String    @id @default(cuid())
+  name            String
+  image           String?
+  league          String
+  country         String
+  status          Status    @default(HIRING)
+  manager         User      @relation("TeamManager", fields: [managerId], references: [id])
+  managerId       String    @unique
+  players         User[]    @relation("TeamPlayers")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Task {
-  id                String        @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   description String?
   priority    String    @default("low")
@@ -63,21 +57,14 @@ model Task {
   createdById String
 }
 
-model DishType {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  description String?
-  dishes      Dish[]     @relation("DishTypes")
-}
-
 enum Role {
   ADMIN
-  USER
+  TEAM
+  PLAYER
 }
 
 enum Status {
-  PENDING
-  APPROVED
-  REJECTED
+  HIRING
+  FULL
+  INACTIVE
 }
-
